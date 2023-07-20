@@ -7,11 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "node src/scripts/generate.mjs"
+    "generate": "backengine-codegen"
   },
   "devDependencies": {
-    "@backengine/codegen": "../..",
-    "dotenv": "^16.3.1"
+    "backengine-codegen": "../.."
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.26.0",

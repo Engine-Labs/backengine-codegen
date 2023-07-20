@@ -1,7 +1,9 @@
+#!/usr/bin/env node
 import { ensureDir, remove, writeFile } from "fs-extra";
 import { parseSupabaseFile } from "./src/supabase";
 import { parseHookFiles } from "./src/hooks";
 import gradient from "gradient-string";
+import "dotenv/config";
 
 export const timeout = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -32,7 +34,7 @@ const run = async () => {
     })
   );
 
-  console.log(supagradient("Backengine code generation finished 🚀"));
+  console.log(supagradient("Backengine code generation completed 🚀"));
 };
 
 run();
