@@ -33,3 +33,8 @@ export type Relationship = {
   target_table_name: string;
   target_column_name: string;
 };
+
+export type File = {
+  fileName: string;
+  content: string;
+};
