@@ -1,0 +1,25 @@
+{
+  "name": "supabase-codegen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch index.ts"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1",
+    "@types/node": "^20.4.2",
+    "change-case-all": "^1.0.15",
+    "prettier": "^3.0.0",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6"
+  },
+  "browser": {
+    "fs": false
+  },
+  "dependencies": {
+    "fs-extra": "^11.1.1"
+  }
+}
