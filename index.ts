@@ -2,21 +2,18 @@
 import { ensureDir, remove, writeFile } from "fs-extra";
 import { parseSupabaseFile } from "./src/supabase";
 import { parseHookFiles } from "./src/hooks";
-import gradient from "gradient-string";
+import { fetchTables } from "./src/tables";
+import { log } from "./src/log";
 import "dotenv/config";
 
-export const timeout = (ms: number) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
+const directory = process.env.IS_DEV ? "__backengine__" : "src/__backengine__";
 
-// TODO: probably want an env variable here
-const directory = false ? "dev-src" : "src/__backengine__";
-const supagradient = gradient(["#00CB8A", "#78E0B8"]);
-
-// TODO: type safety
 const run = async () => {
+  log("Starting code generation");
+  const tables = await fetchTables();
+
   const supabaseFile = await parseSupabaseFile();
-  const hookFiles = await parseHookFiles();
+  const hookFiles = await parseHookFiles(tables);
 
   await remove(directory);
   await ensureDir(`${directory}/hooks`);
@@ -34,7 +31,8 @@ const run = async () => {
     })
   );
 
-  console.log(supagradient("Backengine code generation completed 🚀"));
+  log(`Generated ${hookFiles.length + 1} files in "${directory}"`);
+  log("Code generation completed 🚀");
 };
 
 run();
