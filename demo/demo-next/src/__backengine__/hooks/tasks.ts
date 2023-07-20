@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 
 const useTasks = () => {
-  const [taskss, setTasks] = useState([]);
+  const [tasks, setTasks] = useState<any[]>([]);
 
   useEffect(() => {
     fetchTasks();
@@ -20,7 +20,7 @@ const useTasks = () => {
     }
   };
 
-  return { taskss };
+  return { tasks };
 };
 
 export default useTasks;

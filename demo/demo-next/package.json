@@ -10,7 +10,8 @@
     "generate": "node src/scripts/generate.mjs"
   },
   "devDependencies": {
-    "@backengine/codegen": "../.."
+    "@backengine/codegen": "../..",
+    "dotenv": "^16.3.1"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.26.0",

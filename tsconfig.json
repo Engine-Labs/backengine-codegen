@@ -10,6 +10,6 @@
     "noUnusedParameters": true,
     "skipLibCheck": true
   },
-  "include": ["index.ts"],
+  "include": ["index.ts", "environment.ts"],
   "exclude": ["demo", "dev-src"]
 }

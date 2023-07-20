@@ -63,7 +63,7 @@ export const parseHookFiles = async (): Promise<File[]> => {
         import { supabase } from "../supabase";
       
         const use${pascalCaseName} = () => {
-          const [${camelCaseName}s, set${pascalCaseName}] = useState([]);
+          const [${camelCaseName}, set${pascalCaseName}] = useState<any[]>([]);
 
           useEffect(() => {
             fetch${pascalCaseName}();
@@ -83,7 +83,7 @@ export const parseHookFiles = async (): Promise<File[]> => {
               }
           };
 
-          return { ${camelCaseName}s };
+          return { ${camelCaseName} };
         };
 
         export default use${pascalCaseName};

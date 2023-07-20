@@ -7,5 +7,3 @@ TODO:
 - [ ] Bundle properly
 - [ ] Push to NPM
 - [ ] Fetch tables from backend
-- [ ] Populate environment variables for Supabase
-- [ ] Does demo app run?

@@ -1,10 +1,15 @@
 import { ensureDir, remove, writeFile } from "fs-extra";
 import { parseSupabaseFile } from "./src/supabase";
 import { parseHookFiles } from "./src/hooks";
+import gradient from "gradient-string";
 
-const IS_DEV = false;
+export const timeout = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 // TODO: probably want an env variable here
-const directory = IS_DEV ? "dev-src" : "src/__backengine__";
+const directory = false ? "dev-src" : "src/__backengine__";
+const supagradient = gradient(["#00CB8A", "#78E0B8"]);
 
 // TODO: type safety
 const run = async () => {
@@ -27,7 +32,7 @@ const run = async () => {
     })
   );
 
-  console.log("Backengine code generation finished 🚀");
+  console.log(supagradient("Backengine code generation finished 🚀"));
 };
 
 run();

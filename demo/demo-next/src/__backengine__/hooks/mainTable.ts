@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 
 const useMainTables = () => {
-  const [mainTabless, setMainTables] = useState([]);
+  const [mainTables, setMainTables] = useState<any[]>([]);
 
   useEffect(() => {
     fetchMainTables();
@@ -20,7 +20,7 @@ const useMainTables = () => {
     }
   };
 
-  return { mainTabless };
+  return { mainTables };
 };
 
 export default useMainTables;
