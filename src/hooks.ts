@@ -1,55 +1,128 @@
-import { camelCase, pascalCase } from "change-case-all";
-import pluralize from "pluralize";
+import {
+  camelCase as toCamelCase,
+  pascalCase as toPascalCase,
+} from "change-case-all";
+import { plural, singular } from "pluralize";
 import prettier from "prettier";
-import type { File, Tables } from "./types";
+import type { File, Table, Tables } from "./types";
+
+const parseNameFormats = (
+  name: string
+): {
+  pascalCase: string;
+  pascalCasePlural: string;
+  camelCase: string;
+  camelCasePlural: string;
+} => {
+  return {
+    pascalCase: singular(toPascalCase(name)),
+    pascalCasePlural: plural(toPascalCase(name)),
+    camelCase: singular(toCamelCase(name)),
+    camelCasePlural: plural(toCamelCase(name)),
+  };
+};
+
+const mapTableToFile = async (table: Table): Promise<File> => {
+  const { pascalCase, pascalCasePlural, camelCase, camelCasePlural } =
+    parseNameFormats(table.name);
+
+  const content = `
+    import { useState, useEffect } from "react";
+    import { supabase } from "../supabase";
+
+    const use${pascalCasePlural} = () => {
+      const [${camelCasePlural}, set${pascalCasePlural}] = useState<any[]>([]);
+
+      useEffect(() => {
+        fetch${pascalCasePlural}();
+      }, []);
+
+      const fetch${pascalCasePlural} = async() => {
+          try {
+            const { data, error } = await supabase
+              .from("${table.name}")
+              .select("*");
+            if (error) { 
+              throw error;
+            }
+            set${pascalCasePlural}(data || []);
+          } catch (error) {
+            console.error("Error fetching", error);
+          }
+      };
+
+      const create${pascalCase} = async (newData: any) => {
+        try {
+          const { data, error } = await supabase
+            .from("${table.name}")
+            .insert([newData])
+            .select("*");
+          if (error) {
+            throw error;
+          }
+          set${pascalCasePlural}([...${camelCasePlural}, data[0]]);
+        } catch (error) {
+          console.error("Error creating", error);
+        }
+      };
+
+      const update${pascalCase} = async (id: number, updatedData: any) => {
+        try {
+          const { data, error } = await supabase
+            .from("${table.name}")
+            .update(updatedData)
+            .eq("id", id)
+            .select("*");
+          if (error) {
+            throw error;
+          }
+          set${pascalCasePlural}(
+            ${camelCasePlural}.map((${camelCase}) =>
+              ${camelCase}.id === id ? { ...${camelCase}, ...data[0] } : ${camelCase}
+            )
+          );
+        } catch (error) {
+          console.error("Error updating alert:", error);
+        }
+      };
+
+      const delete${pascalCase} = async (id: number) => {
+        try {
+          const { error } = await supabase
+            .from("${table.name}")
+            .delete()
+            .eq("id", id);
+          if (error) {
+            throw error;
+          }
+          const filtered = ${camelCasePlural}.filter((${camelCase}) => ${camelCase}.id !== id);
+          set${pascalCasePlural}(filtered);
+        } catch (error) {
+          console.error("Error deleting", error);
+        }
+      };
+
+      return { ${camelCasePlural}, create${pascalCase}, update${pascalCase}, delete${pascalCase} };
+    };
+
+    export default use${pascalCasePlural};
+  `;
+
+  const formattedContent = await prettier.format(content, {
+    parser: "typescript",
+  });
+
+  const file: File = {
+    fileName: toCamelCase(table.name),
+    content: formattedContent,
+  };
+  return file;
+};
 
 export const parseHookFiles = async (tables: Tables): Promise<File[]> => {
   const hookPromises = tables
     .filter((table) => table.schema === "public")
-    .map<Promise<File>>(async (table) => {
-      const pascalCaseName = pluralize(pascalCase(table.name));
-      const camelCaseName = pluralize(camelCase(table.name));
-
-      const content = `
-        import { useState, useEffect } from "react";
-        import { supabase } from "../supabase";
-      
-        const use${pascalCaseName} = () => {
-          const [${camelCaseName}, set${pascalCaseName}] = useState<any[]>([]);
-
-          useEffect(() => {
-            fetch${pascalCaseName}();
-          }, []);
-
-          const fetch${pascalCaseName} = async() => {
-              try {
-                const { data, error } = await supabase
-                  .from("${table.name}")
-                  .select("*");
-                if (error) { 
-                  throw error;
-                }
-                set${pascalCaseName}(data || []);
-              } catch (error) {
-                console.error("Error fetching", error);
-              }
-          };
-
-          return { ${camelCaseName} };
-        };
-
-        export default use${pascalCaseName};
-      `;
-
-      const formattedContent = await prettier.format(content, {
-        parser: "typescript",
-      });
-
-      const file: File = {
-        fileName: camelCase(table.name),
-        content: formattedContent,
-      };
-      return file;
-    });
-  return await Promise.all(hookPromises);
+    .map<Promise<File>>(mapTableToFile);
+  const files = await Promise.all(hookPromises);
+  return files;
 };
