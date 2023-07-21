@@ -29,9 +29,15 @@ const mapTableToFile = async (table: Table): Promise<File> => {
   const content = `
     import { useState, useEffect } from "react";
     import { supabase } from "../supabase";
+    import { Database } from "../types";
+
+    type Table = Database["public"]["Tables"]["${table.name}"]
+    type ${pascalCase} = Table["Row"];
+    type Insert${pascalCase} = Table["Insert"];
+    type Update${pascalCase} = Table["Update"];
 
     const use${pascalCasePlural} = () => {
-      const [${camelCasePlural}, set${pascalCasePlural}] = useState<any[]>([]);
+      const [${camelCasePlural}, set${pascalCasePlural}] = useState<${pascalCase}[]>([]);
 
       useEffect(() => {
         fetch${pascalCasePlural}();
@@ -41,7 +47,7 @@ const mapTableToFile = async (table: Table): Promise<File> => {
           try {
             const { data, error } = await supabase
               .from("${table.name}")
-              .select("*");
+              .select<"*", ${pascalCase}>("*");
             if (error) { 
               throw error;
             }
@@ -51,12 +57,12 @@ const mapTableToFile = async (table: Table): Promise<File> => {
           }
       };
 
-      const create${pascalCase} = async (newData: any) => {
+      const create${pascalCase} = async (newData: Insert${pascalCase}) => {
         try {
           const { data, error } = await supabase
             .from("${table.name}")
             .insert([newData])
-            .select("*");
+            .select<"*", ${pascalCase}>("*");
           if (error) {
             throw error;
           }
@@ -66,13 +72,13 @@ const mapTableToFile = async (table: Table): Promise<File> => {
         }
       };
 
-      const update${pascalCase} = async (id: number, updatedData: any) => {
+      const update${pascalCase} = async (id: number, updatedData: Update${pascalCase}) => {
         try {
           const { data, error } = await supabase
             .from("${table.name}")
             .update(updatedData)
             .eq("id", id)
-            .select("*");
+            .select<"*", ${pascalCase}>("*");
           if (error) {
             throw error;
           }

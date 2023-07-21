@@ -1,3 +1,7 @@
+import axios from "axios";
+import prettier from "prettier";
+import { log } from "./log";
+
 export type Tables = Table[];
 
 export type Table = {
@@ -37,4 +41,21 @@ export type Relationship = {
 export type File = {
   fileName: string;
   content: string;
+};
+
+export const fetchTypes = async (): Promise<File> => {
+  // TODO: use proxy
+  const typesResponse = await axios.get<string>(
+    "http://0.0.0.0:1337/generators/typescript"
+  );
+  log("Fetched types metadata");
+
+  const formattedContent = await prettier.format(typesResponse.data, {
+    parser: "typescript",
+  });
+
+  return {
+    content: formattedContent,
+    fileName: "types.ts",
+  };
 };
