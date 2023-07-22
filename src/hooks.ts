@@ -4,7 +4,7 @@ import {
 } from "change-case-all";
 import { plural, singular } from "pluralize";
 import prettier from "prettier";
-import type { File, Table, Tables } from "./types";
+import type { File, TablesResponse } from "./types";
 
 const parseNameFormats = (
   name: string
@@ -22,7 +22,7 @@ const parseNameFormats = (
   };
 };
 
-const mapTableToFile = async (table: Table): Promise<File> => {
+const mapTableToFile = async (table: TablesResponse[number]): Promise<File> => {
   const { pascalCase, pascalCasePlural, camelCase, camelCasePlural } =
     parseNameFormats(table.name);
 
@@ -125,7 +125,9 @@ const mapTableToFile = async (table: Table): Promise<File> => {
   return file;
 };
 
-export const parseHookFiles = async (tables: Tables): Promise<File[]> => {
+export const parseHookFiles = async (
+  tables: TablesResponse
+): Promise<File[]> => {
   const hookPromises = tables
     .filter((table) => table.schema === "public")
     .map<Promise<File>>(mapTableToFile);

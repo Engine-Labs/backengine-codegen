@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "bin": "build/index.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsx watch index.ts"
+    "build": "npm run generate && tsc",
+    "dev": "npm run generate && tsx watch index.ts",
+    "generate": "node src/scripts/generate.mjs"
   },
   "license": "UNLICENSED",
   "devDependencies": {
@@ -17,6 +18,7 @@
     "dotenv": "^16.3.1",
     "fs-extra": "^11.1.1",
     "gradient-string": "^2.0.2",
+    "openapi-typescript": "^6.3.7",
     "pluralize": "^8.0.0",
     "prettier": "^3.0.0",
     "tsx": "^3.12.7",
