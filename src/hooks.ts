@@ -47,7 +47,7 @@ const mapTableToFile = async (table: Table): Promise<File> => {
           try {
             const { data, error } = await supabase
               .from("${table.name}")
-              .select<"*", ${pascalCase}>("*");
+              .select("*");
             if (error) { 
               throw error;
             }
@@ -62,7 +62,7 @@ const mapTableToFile = async (table: Table): Promise<File> => {
           const { data, error } = await supabase
             .from("${table.name}")
             .insert([newData])
-            .select<"*", ${pascalCase}>("*");
+            .select("*");
           if (error) {
             throw error;
           }
@@ -78,7 +78,7 @@ const mapTableToFile = async (table: Table): Promise<File> => {
             .from("${table.name}")
             .update(updatedData)
             .eq("id", id)
-            .select<"*", ${pascalCase}>("*");
+            .select("*");
           if (error) {
             throw error;
           }
@@ -119,7 +119,7 @@ const mapTableToFile = async (table: Table): Promise<File> => {
   });
 
   const file: File = {
-    fileName: toCamelCase(table.name),
+    fileName: `use${pascalCasePlural}`,
     content: formattedContent,
   };
   return file;
