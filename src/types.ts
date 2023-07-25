@@ -11,14 +11,22 @@ export type File = {
   content: string;
 };
 
+export type TypesResponse = {
+  types: string;
+};
+
 export const fetchTypes = async (): Promise<File> => {
-  // TODO: use proxy
-  const typesResponse = await axios.get<string>(
-    "http://0.0.0.0:1337/generators/typescript"
+  const typesResponse = await axios.get<TypesResponse>(
+    `https://api.supabase.com/v1/projects/${process.env.SUPABASE_PROJECT_ID}/types/typescript`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.SUPABASE_MANAGEMENT_API_ACCESS_TOKEN}`,
+      },
+    }
   );
   log("Fetched types metadata");
 
-  const formattedContent = await prettier.format(typesResponse.data, {
+  const formattedContent = await prettier.format(typesResponse.data.types, {
     parser: "typescript",
   });
 
