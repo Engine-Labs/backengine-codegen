@@ -1,6 +1,8 @@
-yarn.lock 
+yarn.lock
 
 build
 node_modules
 __backengine__
 __generated__
+
+.env

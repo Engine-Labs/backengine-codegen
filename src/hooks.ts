@@ -4,7 +4,7 @@ import {
 } from "change-case-all";
 import { plural, singular } from "pluralize";
 import prettier from "prettier";
-import type { File, TablesResponse } from "./types";
+import type { File } from "./types";
 
 const parseNameFormats = (
   name: string
@@ -22,16 +22,16 @@ const parseNameFormats = (
   };
 };
 
-const mapTableToFile = async (table: TablesResponse[number]): Promise<File> => {
+const mapTableToFile = async (tableName: string): Promise<File> => {
   const { pascalCase, pascalCasePlural, camelCase, camelCasePlural } =
-    parseNameFormats(table.name);
+    parseNameFormats(tableName);
 
   const content = `
     import { useState, useEffect } from "react";
     import { supabase } from "../supabase";
     import { Database } from "../types";
 
-    type Table = Database["public"]["Tables"]["${table.name}"]
+    type Table = Database["public"]["Tables"]["${tableName}"]
     type ${pascalCase} = Table["Row"];
     type Insert${pascalCase} = Table["Insert"];
     type Update${pascalCase} = Table["Update"];
@@ -46,9 +46,9 @@ const mapTableToFile = async (table: TablesResponse[number]): Promise<File> => {
       const fetch${pascalCasePlural} = async() => {
           try {
             const { data, error } = await supabase
-              .from("${table.name}")
+              .from("${tableName}")
               .select("*");
-            if (error) { 
+            if (error) {
               throw error;
             }
             set${pascalCasePlural}(data || []);
@@ -60,7 +60,7 @@ const mapTableToFile = async (table: TablesResponse[number]): Promise<File> => {
       const create${pascalCase} = async (newData: Insert${pascalCase}) => {
         try {
           const { data, error } = await supabase
-            .from("${table.name}")
+            .from("${tableName}")
             .insert([newData])
             .select("*");
           if (error) {
@@ -75,7 +75,7 @@ const mapTableToFile = async (table: TablesResponse[number]): Promise<File> => {
       const update${pascalCase} = async (id: number, updatedData: Update${pascalCase}) => {
         try {
           const { data, error } = await supabase
-            .from("${table.name}")
+            .from("${tableName}")
             .update(updatedData)
             .eq("id", id)
             .select("*");
@@ -95,7 +95,7 @@ const mapTableToFile = async (table: TablesResponse[number]): Promise<File> => {
       const delete${pascalCase} = async (id: number) => {
         try {
           const { error } = await supabase
-            .from("${table.name}")
+            .from("${tableName}")
             .delete()
             .eq("id", id);
           if (error) {
@@ -125,12 +125,8 @@ const mapTableToFile = async (table: TablesResponse[number]): Promise<File> => {
   return file;
 };
 
-export const parseHookFiles = async (
-  tables: TablesResponse
-): Promise<File[]> => {
-  const hookPromises = tables
-    .filter((table) => table.schema === "public")
-    .map<Promise<File>>(mapTableToFile);
+export const parseHookFiles = async (tableNames: string[]): Promise<File[]> => {
+  const hookPromises = tableNames.map<Promise<File>>(mapTableToFile);
   const files = await Promise.all(hookPromises);
   return files;
 };

@@ -4,23 +4,39 @@ import { ensureDir, remove, writeFile } from "fs-extra";
 import { parseHookFiles } from "./src/hooks";
 import { log } from "./src/log";
 import { parseSupabaseFile } from "./src/supabase";
-import { fetchTables } from "./src/tables";
 import { fetchTypes } from "./src/types";
+import { Project } from "ts-morph";
 
 const directory = process.env.IS_DEV ? "__backengine__" : "src/__backengine__";
 
 const run = async () => {
   log("Starting code generation");
-  const tables = await fetchTables();
   const types = await fetchTypes();
-
-  const supabaseFile = await parseSupabaseFile();
-  const hookFiles = await parseHookFiles(tables);
-
   await remove(directory);
   await ensureDir(`${directory}/hooks`);
-
   await writeFile(`${directory}/${types.fileName}`, types.content);
+
+  const TableNames = (): string[] => {
+    const project = new Project();
+    const sourceFile = project.addSourceFileAtPath(
+      `${directory}/${types.fileName}`
+    );
+    const node = sourceFile.getInterface("Database")!;
+
+    const tables = node.getProperty("public")!.getType().getProperty("Tables")!;
+
+    return tables
+      .getTypeAtLocation(node)
+      .getProperties()
+      .map((p) => {
+        return p.getName();
+      });
+  };
+  const tableNames = TableNames();
+
+  const supabaseFile = await parseSupabaseFile();
+  const hookFiles = await parseHookFiles(tableNames);
+
   await writeFile(
     `${directory}/${supabaseFile.fileName}`,
     supabaseFile.content
