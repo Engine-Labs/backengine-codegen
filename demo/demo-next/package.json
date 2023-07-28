@@ -7,10 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "backengine-codegen"
+    "generate": "codegen"
   },
   "devDependencies": {
-    "backengine-codegen": "../.."
+    "@backengine/codegen": "../../"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.26.0",
