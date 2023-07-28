@@ -47,7 +47,7 @@ const mapTableToFile = async (tableName: string): Promise<File> => {
           try {
             const { data, error } = await supabase
               .from("${tableName}")
-              .select("*");
+              .select();
             if (error) {
               throw error;
             }
@@ -62,7 +62,7 @@ const mapTableToFile = async (tableName: string): Promise<File> => {
           const { data, error } = await supabase
             .from("${tableName}")
             .insert([newData])
-            .select("*");
+            .select();
           if (error) {
             throw error;
           }
@@ -78,7 +78,7 @@ const mapTableToFile = async (tableName: string): Promise<File> => {
             .from("${tableName}")
             .update(updatedData)
             .eq("id", id)
-            .select("*");
+            .select();
           if (error) {
             throw error;
           }
