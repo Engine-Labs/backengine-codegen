@@ -1,6 +1,6 @@
 {
   "name": "@backengine/codegen",
-  "version": "1.0.2",
+  "version": "1.0.7",
   "description": "Generate code for Backengine projects.",
   "bin": "build/index.js",
   "license": "MIT",
@@ -17,20 +17,22 @@
     "dev": "npm run generate && tsx watch index.ts",
     "generate": "node src/scripts/generate.mjs"
   },
-  "devDependencies": {
-    "@types/fs-extra": "^11.0.1",
-    "@types/gradient-string": "^1.1.2",
-    "@types/node": "^20.4.2",
-    "@types/pluralize": "^0.0.30",
+  "dependencies": {
     "axios": "^1.4.0",
     "change-case-all": "^1.0.15",
     "dotenv": "^16.3.1",
     "fs-extra": "^11.1.1",
     "gradient-string": "^2.0.2",
-    "openapi-typescript": "^6.3.7",
     "pluralize": "^8.0.0",
     "prettier": "^3.0.0",
-    "ts-morph": "^19.0.0",
+    "ts-morph": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1",
+    "@types/gradient-string": "^1.1.2",
+    "@types/node": "^20.4.2",
+    "@types/pluralize": "^0.0.30",
+    "openapi-typescript": "^6.3.7",
     "tsx": "^3.12.7",
     "typescript": "^5.1.6"
   }

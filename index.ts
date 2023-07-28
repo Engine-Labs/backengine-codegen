@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 import "dotenv/config";
 import { ensureDir, remove, writeFile } from "fs-extra";
+import { Project } from "ts-morph";
+import { version } from "./package.json";
 import { parseHookFiles } from "./src/hooks";
 import { log } from "./src/log";
 import { parseSupabaseFile } from "./src/supabase";
 import { File, fetchTypes } from "./src/types";
-import { Project } from "ts-morph";
 
-const directory = process.env.IS_DEV ? "__backengine__" : "src/__backengine__";
+const directory = "__backengine__";
 
 const fetchTableNames = (types: File): string[] => {
   const project = new Project();
@@ -25,7 +26,7 @@ const fetchTableNames = (types: File): string[] => {
 };
 
 const run = async () => {
-  log("Starting code generation");
+  log(`Starting code generation (v${version})`);
   const types = await fetchTypes();
 
   await remove(directory);
