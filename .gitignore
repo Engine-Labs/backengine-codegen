@@ -4,5 +4,6 @@ build
 node_modules
 __backengine__
 __generated__
+.vscode
 
 .env
