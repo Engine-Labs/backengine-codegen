@@ -1,6 +1,6 @@
 {
   "name": "@backengine/codegen",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Generate code for Backengine projects.",
   "bin": "build/index.js",
   "license": "MIT",
