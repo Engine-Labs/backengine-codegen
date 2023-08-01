@@ -1,13 +1,8 @@
-import {
-  camelCase as toCamelCase,
-  pascalCase as toPascalCase,
-} from "change-case-all";
-import { plural, singular } from "pluralize";
 import prettier from "prettier";
 import { Project } from "ts-morph";
-import { DIRECTORY } from "..";
-import comment from "./comment";
-import type { File, HookFile } from "./types";
+import comment from "../comment";
+import type { File, HookFile } from "../types";
+import { DIRECTORY, parseNameFormats } from "../utils";
 
 const parseTableNames = (types: File): string[] => {
   const project = new Project();
@@ -22,22 +17,6 @@ const parseTableNames = (types: File): string[] => {
     .getTypeAtLocation(node)
     .getProperties()
     .map((property) => property.getName());
-};
-
-const parseNameFormats = (
-  name: string
-): {
-  pascalCase: string;
-  pascalCasePlural: string;
-  camelCase: string;
-  camelCasePlural: string;
-} => {
-  return {
-    pascalCase: singular(toPascalCase(name)),
-    pascalCasePlural: plural(toPascalCase(name)),
-    camelCase: singular(toCamelCase(name)),
-    camelCasePlural: plural(toCamelCase(name)),
-  };
 };
 
 const mapTableToFile = async (tableName: string): Promise<HookFile> => {
@@ -153,7 +132,7 @@ const mapTableToFile = async (tableName: string): Promise<HookFile> => {
   };
 };
 
-export const parseHookFiles = async (types: File): Promise<HookFile[]> => {
+export const parseTableFiles = async (types: File): Promise<HookFile[]> => {
   const tableNames = parseTableNames(types);
   const hookPromises = tableNames.map<Promise<HookFile>>(mapTableToFile);
   const files = await Promise.all(hookPromises);

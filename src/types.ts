@@ -1,8 +1,8 @@
 import axios from "axios";
 import prettier from "prettier";
-import { log } from "./log";
 import type { paths } from "./__generated__/types";
 import comment from "./comment";
+import { log } from "./utils";
 
 export type TablesResponse =
   paths["/tables/"]["get"]["responses"]["200"]["content"]["application/json"];
@@ -16,7 +16,7 @@ export type HookFile = {
   file: File;
   location: string;
   type: "HOOK";
-  entity: "TABLE";
+  entity: "TABLE" | "VIEW";
   usage: string;
 };
 

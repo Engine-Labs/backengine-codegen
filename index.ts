@@ -3,12 +3,10 @@ import "dotenv/config";
 import { ensureDir, remove, writeFile } from "fs-extra";
 import { version } from "./package.json";
 import { parseHookFiles } from "./src/hooks";
-import { log, logError } from "./src/log";
 import { parseMetadataFile } from "./src/metadata";
 import { parseSupabaseFile } from "./src/supabase";
 import { File, HookFile, fetchTypes } from "./src/types";
-
-export const DIRECTORY = "__backengine__";
+import { DIRECTORY, log, logError } from "./src/utils";
 
 const writeFiles = async (
   supabaseFile: File,
