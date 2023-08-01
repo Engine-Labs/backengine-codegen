@@ -1,20 +1,16 @@
 import prettier from "prettier";
+import comment from "./comment";
 import type { File } from "./types";
 
 export const parseSupabaseFile = async (): Promise<File> => {
   const content = `
-    import { createClient } from "@supabase/supabase-js";
+    ${comment}
+
+    import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
     import type { Database } from "./types";
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw "Please populate the NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.";
-    }
-
-    const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
-
+    
+    const supabase = createClientComponentClient<Database>();
+    
     export { supabase };
   `;
 

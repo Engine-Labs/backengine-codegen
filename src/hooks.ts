@@ -4,7 +4,25 @@ import {
 } from "change-case-all";
 import { plural, singular } from "pluralize";
 import prettier from "prettier";
-import type { File } from "./types";
+import { Project } from "ts-morph";
+import { DIRECTORY } from "..";
+import comment from "./comment";
+import type { File, HookFile } from "./types";
+
+const parseTableNames = (types: File): string[] => {
+  const project = new Project();
+  const sourceFile = project.addSourceFileAtPath(
+    `${DIRECTORY}/${types.fileName}`
+  );
+
+  const node = sourceFile.getInterface("Database")!;
+  const tables = node.getProperty("public")!.getType().getProperty("Tables")!;
+
+  return tables
+    .getTypeAtLocation(node)
+    .getProperties()
+    .map((property) => property.getName());
+};
 
 const parseNameFormats = (
   name: string
@@ -22,11 +40,13 @@ const parseNameFormats = (
   };
 };
 
-const mapTableToFile = async (tableName: string): Promise<File> => {
+const mapTableToFile = async (tableName: string): Promise<HookFile> => {
   const { pascalCase, pascalCasePlural, camelCase, camelCasePlural } =
     parseNameFormats(tableName);
 
   const content = `
+    ${comment}
+
     import { useState, useEffect } from "react";
     import { supabase } from "../supabase";
     import { Database } from "../types";
@@ -122,11 +142,20 @@ const mapTableToFile = async (tableName: string): Promise<File> => {
     fileName: `use${pascalCasePlural}`,
     content: formattedContent,
   };
-  return file;
+  const usage = `const { ${camelCasePlural}, create${pascalCase}, update${pascalCase}, delete${pascalCase} } = use${pascalCasePlural}();`;
+
+  return {
+    file,
+    location: `${DIRECTORY}/hooks/${file.fileName}.ts`,
+    type: "HOOK",
+    entity: "TABLE",
+    usage,
+  };
 };
 
-export const parseHookFiles = async (tableNames: string[]): Promise<File[]> => {
-  const hookPromises = tableNames.map<Promise<File>>(mapTableToFile);
+export const parseHookFiles = async (types: File): Promise<HookFile[]> => {
+  const tableNames = parseTableNames(types);
+  const hookPromises = tableNames.map<Promise<HookFile>>(mapTableToFile);
   const files = await Promise.all(hookPromises);
   return files;
 };
