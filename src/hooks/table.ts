@@ -11,12 +11,31 @@ const parseTableNames = (types: File): string[] => {
   );
 
   const node = sourceFile.getInterface("Database")!;
+
   const tables = node.getProperty("public")!.getType().getProperty("Tables")!;
 
-  return tables
+  const tableNames = tables
     .getTypeAtLocation(node)
     .getProperties()
     .map((property) => property.getName());
+
+  const tableIdTypes = tables
+    .getTypeAtLocation(node)
+    .getProperties()
+    .map((property) => {
+      const id = property
+        .getTypeAtLocation(node)
+        .getProperty("Row")!
+        .getTypeAtLocation(node)
+        .getProperty("id")!;
+      if (!id) {
+        return null;
+      }
+      return id.getTypeAtLocation(node).getText();
+    });
+
+  // filter tables with no "id" column
+  return tableNames.filter((_, index) => tableIdTypes.at(index) !== null);
 };
 
 const mapTableToFile = async (tableName: string): Promise<HookFile> => {
@@ -71,7 +90,7 @@ const mapTableToFile = async (tableName: string): Promise<HookFile> => {
         }
       };
 
-      const update${pascalCase} = async (id: number, updatedData: Update${pascalCase}) => {
+      const update${pascalCase} = async (id: ${pascalCase}["id"], updatedData: Update${pascalCase}) => {
         try {
           const { data, error } = await supabase
             .from("${tableName}")
@@ -91,7 +110,7 @@ const mapTableToFile = async (tableName: string): Promise<HookFile> => {
         }
       };
 
-      const delete${pascalCase} = async (id: number) => {
+      const delete${pascalCase} = async (id: ${pascalCase}["id"]) => {
         try {
           const { error } = await supabase
             .from("${tableName}")
