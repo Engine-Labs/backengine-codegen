@@ -1,49 +1,55 @@
 import prettier from "prettier";
-import { Project } from "ts-morph";
 import comment from "../comment";
 import type { File, HookFile } from "../types";
-import { DIRECTORY, parseNameFormats } from "../utils";
+import { DIRECTORY, log, parseNameFormats } from "../utils";
+import axios from "axios";
+import type { paths } from "../__generated__/types";
 
-const parseViewNames = (types: File): string[] => {
-  const project = new Project();
-  const sourceFile = project.addSourceFileAtPath(
-    `${DIRECTORY}/${types.fileName}`
+export type ViewsResponse =
+  paths["/views/"]["get"]["responses"]["200"]["content"]["application/json"];
+
+const parseViewNames = async (): Promise<string[]> => {
+  const response = await axios.get<ViewsResponse>(
+    `${process.env.BACKENGINE_BASE_URL}/api/v1/projects/${process.env.BACKENGINE_PROJECT_ID}/pg-meta/tables`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.BACKENGINE_API_KEY}`,
+        Accept: "application/json",
+      },
+    }
   );
+  log("Fetched view metadata");
 
-  const node = sourceFile.getInterface("Database")!;
-  const tables = node.getProperty("public")!.getType().getProperty("Views")!;
+  const publicViews = response.data.filter((view) => view.schema === "public");
 
-  return tables
-    .getTypeAtLocation(node)
-    .getProperties()
-    .map((property) => property.getName());
+  return publicViews.map((view) => view.name);
 };
 
-const mapViewToFile = async (tableName: string): Promise<HookFile> => {
+const mapViewToFile = async (viewName: string): Promise<HookFile> => {
   const { pascalCase, pascalCasePlural, camelCasePlural } =
-    parseNameFormats(tableName);
+    parseNameFormats(viewName);
 
   const content = `
       ${comment}
-  
+
       import { useState, useEffect } from "react";
       import { supabase } from "../supabase";
       import { Database } from "../types";
-  
-      type View = Database["public"]["Views"]["${tableName}"]
+
+      type View = Database["public"]["Views"]["${viewName}"]
       type ${pascalCase} = View["Row"];
-  
+
       const use${pascalCasePlural} = () => {
         const [${camelCasePlural}, set${pascalCasePlural}] = useState<${pascalCase}[]>([]);
-  
+
         useEffect(() => {
           fetch${pascalCasePlural}();
         }, []);
-  
+
         const fetch${pascalCasePlural} = async() => {
             try {
               const { data, error } = await supabase
-                .from("${tableName}")
+                .from("${viewName}")
                 .select();
               if (error) {
                 throw error;
@@ -53,10 +59,10 @@ const mapViewToFile = async (tableName: string): Promise<HookFile> => {
               console.error("Error fetching", error);
             }
         };
-  
+
         return { ${camelCasePlural} };
       };
-  
+
       export default use${pascalCasePlural};
     `;
 
@@ -79,8 +85,8 @@ const mapViewToFile = async (tableName: string): Promise<HookFile> => {
   };
 };
 
-export const parseViewFiles = async (types: File): Promise<HookFile[]> => {
-  const viewNames = parseViewNames(types);
+export const parseViewFiles = async (): Promise<HookFile[]> => {
+  const viewNames = await parseViewNames();
   const hookPromises = viewNames.map<Promise<HookFile>>(mapViewToFile);
   const files = await Promise.all(hookPromises);
   return files;

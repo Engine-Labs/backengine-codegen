@@ -1,41 +1,30 @@
+import axios from "axios";
 import prettier from "prettier";
-import { Project } from "ts-morph";
+import type { paths } from "../__generated__/types";
 import comment from "../comment";
 import type { File, HookFile } from "../types";
-import { DIRECTORY, parseNameFormats } from "../utils";
+import { DIRECTORY, log, parseNameFormats } from "../utils";
 
-const parseTableNames = (types: File): string[] => {
-  const project = new Project();
-  const sourceFile = project.addSourceFileAtPath(
-    `${DIRECTORY}/${types.fileName}`
+export type TablesResponse =
+  paths["/tables/"]["get"]["responses"]["200"]["content"]["application/json"];
+
+const parseTableNames = async (): Promise<string[]> => {
+  const tablesResponse = await axios.get<TablesResponse>(
+    `${process.env.BACKENGINE_BASE_URL}/api/v1/projects/${process.env.BACKENGINE_PROJECT_ID}/pg-meta/tables`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.BACKENGINE_API_KEY}`,
+        Accept: "application/json",
+      },
+    }
+  );
+  log("Fetched table metadata");
+
+  const publicTables = tablesResponse.data.filter(
+    (table) => table.schema === "public"
   );
 
-  const node = sourceFile.getInterface("Database")!;
-
-  const tables = node.getProperty("public")!.getType().getProperty("Tables")!;
-
-  const tableNames = tables
-    .getTypeAtLocation(node)
-    .getProperties()
-    .map((property) => property.getName());
-
-  const tableIdTypes = tables
-    .getTypeAtLocation(node)
-    .getProperties()
-    .map((property) => {
-      const id = property
-        .getTypeAtLocation(node)
-        .getProperty("Row")!
-        .getTypeAtLocation(node)
-        .getProperty("id")!;
-      if (!id) {
-        return null;
-      }
-      return id.getTypeAtLocation(node).getText();
-    });
-
-  // filter tables with no "id" column
-  return tableNames.filter((_, index) => tableIdTypes.at(index) !== null);
+  return publicTables.map((table) => table.name);
 };
 
 const mapTableToFile = async (tableName: string): Promise<HookFile> => {
@@ -151,8 +140,8 @@ const mapTableToFile = async (tableName: string): Promise<HookFile> => {
   };
 };
 
-export const parseTableFiles = async (types: File): Promise<HookFile[]> => {
-  const tableNames = parseTableNames(types);
+export const parseTableFiles = async (): Promise<HookFile[]> => {
+  const tableNames = await parseTableNames();
   const hookPromises = tableNames.map<Promise<HookFile>>(mapTableToFile);
   const files = await Promise.all(hookPromises);
   return files;
