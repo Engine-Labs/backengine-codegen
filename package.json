@@ -1,6 +1,6 @@
 {
   "name": "@backengine/codegen",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Generate code for Backengine projects.",
   "bin": "build/index.js",
   "files": [
