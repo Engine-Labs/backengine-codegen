@@ -49,7 +49,7 @@ const run = async () => {
   await writeFile(`${DIRECTORY}/${types.fileName}`, types.content);
 
   const supabaseFile = await parseSupabaseFile();
-  const hookFiles = await parseHookFiles(types);
+  const hookFiles = await parseHookFiles();
   const metadataFile = await parseMetadataFile(hookFiles);
   const componentFiles = await parseComponentFiles(hookFiles);
 

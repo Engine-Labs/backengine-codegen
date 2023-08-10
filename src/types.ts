@@ -1,11 +1,7 @@
 import axios from "axios";
 import prettier from "prettier";
-import type { paths } from "./__generated__/types";
 import comment from "./comment";
 import { log } from "./utils";
-
-export type TablesResponse =
-  paths["/tables/"]["get"]["responses"]["200"]["content"]["application/json"];
 
 export type File = {
   fileName: string;
@@ -25,16 +21,19 @@ export type TypesResponse = {
 };
 
 export const fetchTypes = async (): Promise<File> => {
-  if (!process.env.SUPABASE_PROJECT_ID)
-    throw Error("SUPABASE_PROJECT_ID must be supplied");
-  if (!process.env.SUPABASE_MANAGEMENT_API_ACCESS_TOKEN)
-    throw Error("SUPABASE_MANAGEMENT_API_ACCESS_TOKEN must be supplied");
+  if (!process.env.BACKENGINE_BASE_URL)
+    throw Error("BACKENGINE_BASE_URL must be supplied");
+  if (!process.env.BACKENGINE_PROJECT_ID)
+    throw Error("BACKENGINE_PROJECT_ID must be supplied");
+  if (!process.env.BACKENGINE_API_KEY)
+    throw Error("BACKENGINE_API_KEY must be supplied");
 
-  const typesResponse = await axios.get<TypesResponse>(
-    `https://api.supabase.com/v1/projects/${process.env.SUPABASE_PROJECT_ID}/types/typescript`,
+  const typesResponse = await axios.get(
+    `${process.env.BACKENGINE_BASE_URL}/api/v1/projects/${process.env.BACKENGINE_PROJECT_ID}/pg-meta/generators/typescript`,
     {
       headers: {
-        Authorization: `Bearer ${process.env.SUPABASE_MANAGEMENT_API_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${process.env.BACKENGINE_API_KEY}`,
+        Accept: "application/json",
       },
     }
   );
@@ -43,7 +42,7 @@ export const fetchTypes = async (): Promise<File> => {
   const types = `
     ${comment}
 
-    ${typesResponse.data.types}
+    ${typesResponse.data}
   `;
 
   const formattedContent = await prettier.format(types, {

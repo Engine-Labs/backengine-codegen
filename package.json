@@ -27,8 +27,7 @@
     "fs-extra": "^11.1.1",
     "gradient-string": "^2.0.2",
     "pluralize": "^8.0.0",
-    "prettier": "^3.0.0",
-    "ts-morph": "^19.0.0"
+    "prettier": "^3.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.1",
