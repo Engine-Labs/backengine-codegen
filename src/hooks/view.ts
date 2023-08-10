@@ -10,7 +10,7 @@ export type ViewsResponse =
 
 const parseViewNames = async (): Promise<string[]> => {
   const response = await axios.get<ViewsResponse>(
-    `${process.env.BACKENGINE_BASE_URL}/api/v1/projects/${process.env.BACKENGINE_PROJECT_ID}/pg-meta/tables`,
+    `${process.env.BACKENGINE_BASE_URL}/api/v1/projects/${process.env.BACKENGINE_PROJECT_ID}/pg-meta/views`,
     {
       headers: {
         Authorization: `Bearer ${process.env.BACKENGINE_API_KEY}`,
