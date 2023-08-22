@@ -3,10 +3,38 @@ import comment from "../comment";
 import type { File, HookFile } from "../types";
 import { DIRECTORY, log, parseNameFormats } from "../utils";
 import axios from "axios";
-import type { paths } from "../__generated__/types";
 
-export type ViewsResponse =
-  paths["/views/"]["get"]["responses"]["200"]["content"]["application/json"];
+export type ColumnResponse = {
+  tableId: number;
+  schema: string;
+  table: string;
+  id: string;
+  ordinalPosition: number;
+  name: string;
+  defaultValue: unknown;
+  dataType: string;
+  format: string;
+  isIdentity: boolean;
+  identityGeneration: "ALWAYS" | "BY DEFAULT" | null;
+  isGenerated: boolean;
+  isNullable: boolean;
+  isUpdatable: boolean;
+  isUnique: boolean;
+  enums: string[];
+  check: string | null;
+  comment: string | null;
+};
+
+export type ViewResponse = {
+  id: number;
+  schema: string;
+  name: string;
+  isUpdatable: boolean;
+  comment: string | null;
+  columns?: ColumnResponse[];
+};
+
+export type ViewsResponse = ViewResponse[];
 
 const parseViewNames = async (): Promise<string[]> => {
   const response = await axios.get<ViewsResponse>(

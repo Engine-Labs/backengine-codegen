@@ -1,6 +1,6 @@
 {
   "name": "@backengine/codegen",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Generate code for Backengine projects.",
   "bin": "build/index.js",
   "files": [
@@ -16,9 +16,8 @@
   ],
   "author": "Backengine",
   "scripts": {
-    "build": "npm run generate && tsc",
-    "dev": "npm run generate && tsx watch index.ts",
-    "generate": "node src/scripts/generate.mjs"
+    "build": "tsc",
+    "dev": "tsx watch index.ts"
   },
   "dependencies": {
     "axios": "^1.4.0",
@@ -34,7 +33,6 @@
     "@types/gradient-string": "^1.1.2",
     "@types/node": "^20.4.2",
     "@types/pluralize": "^0.0.30",
-    "openapi-typescript": "^6.3.7",
     "tsx": "^3.12.7",
     "typescript": "^5.1.6"
   }

@@ -1,12 +1,62 @@
 import axios from "axios";
 import prettier from "prettier";
-import type { paths } from "../__generated__/types";
 import comment from "../comment";
 import type { File, HookFile } from "../types";
 import { DIRECTORY, log, parseNameFormats } from "../utils";
 
-export type TablesResponse =
-  paths["/tables/"]["get"]["responses"]["200"]["content"]["application/json"];
+export type ColumnResponse = {
+  tableId: number;
+  schema: string;
+  table: string;
+  id: string;
+  ordinalPosition: number;
+  name: string;
+  defaultValue: unknown;
+  dataType: string;
+  format: string;
+  isIdentity: boolean;
+  identityGeneration: "ALWAYS" | "BY DEFAULT" | null;
+  isGenerated: boolean;
+  isNullable: boolean;
+  isUpdatable: boolean;
+  isUnique: boolean;
+  enums: string[];
+  check: string | null;
+  comment: string | null;
+};
+
+export type TableResponse = {
+  id: number;
+  schema: string;
+  name: string;
+  rlsEnabled: boolean;
+  rlsForced: boolean;
+  replicaIdentity: "DEFAULT" | "INDEX" | "FULL" | "NOTHING";
+  bytes: number;
+  size: string;
+  liveRowsEstimate: number;
+  deadRowsEstimate: number;
+  comment: string | null;
+  columns?: ColumnResponse[];
+  primaryKeys: {
+    schema: string;
+    tableName: string;
+    name: string;
+    tableId: number;
+  }[];
+  relationships: {
+    id: number;
+    constraintName: string;
+    sourceSchema: string;
+    sourceTableName: string;
+    sourceColumnName: string;
+    targetTableSchema: string;
+    targetTableName: string;
+    targetColumnName: string;
+  }[];
+};
+
+export type TablesResponse = TableResponse[];
 
 const parseTableNames = async (): Promise<string[]> => {
   const tablesResponse = await axios.get<TablesResponse>(
@@ -20,9 +70,9 @@ const parseTableNames = async (): Promise<string[]> => {
   );
   log("Fetched table metadata");
 
-  const publicTables = tablesResponse.data.filter(
-    (table) => table.schema === "public"
-  );
+  const publicTables = tablesResponse.data
+    .filter((table) => table.schema === "public")
+    .filter(({ primaryKeys }) => primaryKeys.some(({ name }) => name === "id"));
 
   return publicTables.map((table) => table.name);
 };
