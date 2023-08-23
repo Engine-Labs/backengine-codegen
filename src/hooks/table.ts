@@ -1,83 +1,11 @@
-import axios from "axios";
 import prettier from "prettier";
 import comment from "../comment";
 import type { File, HookFile } from "../types";
-import { DIRECTORY, log, parseNameFormats } from "../utils";
+import { DIRECTORY, parseNameFormats } from "../utils";
+import { TableResponse, TablesResponse } from "../pgMeta/fetchTables";
 
-export type ColumnResponse = {
-  tableId: number;
-  schema: string;
-  table: string;
-  id: string;
-  ordinalPosition: number;
-  name: string;
-  defaultValue: unknown;
-  dataType: string;
-  format: string;
-  isIdentity: boolean;
-  identityGeneration: "ALWAYS" | "BY DEFAULT" | null;
-  isGenerated: boolean;
-  isNullable: boolean;
-  isUpdatable: boolean;
-  isUnique: boolean;
-  enums: string[];
-  check: string | null;
-  comment: string | null;
-};
-
-export type TableResponse = {
-  id: number;
-  schema: string;
-  name: string;
-  rlsEnabled: boolean;
-  rlsForced: boolean;
-  replicaIdentity: "DEFAULT" | "INDEX" | "FULL" | "NOTHING";
-  bytes: number;
-  size: string;
-  liveRowsEstimate: number;
-  deadRowsEstimate: number;
-  comment: string | null;
-  columns?: ColumnResponse[];
-  primaryKeys: {
-    schema: string;
-    tableName: string;
-    name: string;
-    tableId: number;
-  }[];
-  relationships: {
-    id: number;
-    constraintName: string;
-    sourceSchema: string;
-    sourceTableName: string;
-    sourceColumnName: string;
-    targetTableSchema: string;
-    targetTableName: string;
-    targetColumnName: string;
-  }[];
-};
-
-export type TablesResponse = TableResponse[];
-
-const parseTableNames = async (): Promise<string[]> => {
-  const tablesResponse = await axios.get<TablesResponse>(
-    `${process.env.BACKENGINE_BASE_URL}/api/v1/projects/${process.env.BACKENGINE_PROJECT_ID}/pg-meta/tables`,
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.BACKENGINE_API_KEY}`,
-        Accept: "application/json",
-      },
-    }
-  );
-  log("Fetched table metadata");
-
-  const publicTables = tablesResponse.data
-    .filter((table) => table.schema === "public")
-    .filter(({ primaryKeys }) => primaryKeys.some(({ name }) => name === "id"));
-
-  return publicTables.map((table) => table.name);
-};
-
-const mapTableToFile = async (tableName: string): Promise<HookFile> => {
+const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
+  const { name: tableName } = table;
   const { pascalCase, pascalCasePlural, camelCase, camelCasePlural } =
     parseNameFormats(tableName);
 
@@ -190,9 +118,11 @@ const mapTableToFile = async (tableName: string): Promise<HookFile> => {
   };
 };
 
-export const parseTableFiles = async (): Promise<HookFile[]> => {
-  const tableNames = await parseTableNames();
-  const hookPromises = tableNames.map<Promise<HookFile>>(mapTableToFile);
-  const files = await Promise.all(hookPromises);
-  return files;
+export const parseTableFiles = async (
+  tables: TablesResponse
+): Promise<HookFile[]> => {
+  const tableHookPromises = tables.map<Promise<HookFile>>(mapTableToFile);
+  const tableFiles = await Promise.all(tableHookPromises);
+
+  return tableFiles;
 };
