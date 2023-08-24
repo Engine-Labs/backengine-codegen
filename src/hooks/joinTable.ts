@@ -1,6 +1,6 @@
 import prettier from "prettier";
 import comment from "../comment";
-import { TableResponse, TablesResponse } from "../pgMeta/fetchTables";
+import type { TableResponse, TablesResponse } from "../pgMeta/fetchTables";
 import type { File, HookFile } from "../types";
 import { DIRECTORY, parseNameFormats } from "../utils";
 

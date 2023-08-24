@@ -18,8 +18,8 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
 
     type Table = Database["public"]["Tables"]["${tableName}"]
     export type Row = Table["Row"];
-    type Insert${pascalCase} = Table["Insert"];
-    type Update${pascalCase} = Table["Update"];
+    export type Insert${pascalCase} = Table["Insert"];
+    export type Update${pascalCase} = Table["Update"];
 
     const use${pascalCasePlural} = () => {
       const [${camelCasePlural}, set${pascalCasePlural}] = useState<Row[]>([]);
@@ -52,12 +52,13 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
             throw error;
           }
           set${pascalCasePlural}([...${camelCasePlural}, data[0]]);
+          return data[0]
         } catch (error) {
           console.error("Error creating", error);
         }
       };
 
-      const update${pascalCase} = async (id: ${pascalCase}["id"], updatedData: Update${pascalCase}) => {
+      const update${pascalCase} = async (id: Row["id"], updatedData: Update${pascalCase}) => {
         try {
           const { data, error } = await supabase
             .from("${tableName}")
@@ -77,7 +78,7 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
         }
       };
 
-      const delete${pascalCase} = async (id: ${pascalCase}["id"]): Promise<number | null> => {
+      const delete${pascalCase} = async (id: Row["id"]): Promise<number | null> => {
         try {
           const { error, count } = await supabase
             .from("${tableName}")
@@ -109,7 +110,7 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
     fileName: `use${pascalCasePlural}`,
     content: formattedContent,
   };
-  const usage = `const { ${camelCasePlural}, create${pascalCase}, update${pascalCase}, delete${pascalCase} } = use${pascalCasePlural}();`;
+  const usage = `const { ${camelCasePlural}, fetch${pascalCasePlural}, create${pascalCase}, update${pascalCase}, delete${pascalCase} } = use${pascalCasePlural}();`;
 
   return {
     file,
