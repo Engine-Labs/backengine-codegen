@@ -73,7 +73,7 @@ const mapJoinTableToFile = async (
     fileName: `use${joinTableFormats.pascalCasePlural}`,
     content: formattedContent,
   };
-  const usage = `const { ${tableOneFetchFunctionName} } = use${joinTableFormats.pascalCasePlural}();`;
+  const usage = `const { ${tableOneFetchFunctionName}, ${tableTwoFetchFunctionName} } = use${joinTableFormats.pascalCasePlural}();`;
 
   return {
     file,

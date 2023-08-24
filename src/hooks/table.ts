@@ -17,12 +17,12 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
     import { Database } from "../types";
 
     type Table = Database["public"]["Tables"]["${tableName}"]
-    type ${pascalCase} = Table["Row"];
+    export type Row = Table["Row"];
     type Insert${pascalCase} = Table["Insert"];
     type Update${pascalCase} = Table["Update"];
 
     const use${pascalCasePlural} = () => {
-      const [${camelCasePlural}, set${pascalCasePlural}] = useState<${pascalCase}[]>([]);
+      const [${camelCasePlural}, set${pascalCasePlural}] = useState<Row[]>([]);
 
       useEffect(() => {
         fetch${pascalCasePlural}();
@@ -95,7 +95,7 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
         return 0
       };
 
-      return { ${camelCasePlural}, create${pascalCase}, update${pascalCase}, delete${pascalCase} };
+      return { ${camelCasePlural}, fetch${pascalCasePlural}, create${pascalCase}, update${pascalCase}, delete${pascalCase} };
     };
 
     export default use${pascalCasePlural};
