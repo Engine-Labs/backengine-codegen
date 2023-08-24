@@ -77,20 +77,22 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
         }
       };
 
-      const delete${pascalCase} = async (id: ${pascalCase}["id"]) => {
+      const delete${pascalCase} = async (id: ${pascalCase}["id"]): Promise<number | null> => {
         try {
-          const { error } = await supabase
+          const { error, count } = await supabase
             .from("${tableName}")
-            .delete()
+            .delete({ count: "exact" })
             .eq("id", id);
           if (error) {
             throw error;
           }
           const filtered = ${camelCasePlural}.filter((${camelCase}) => ${camelCase}.id !== id);
           set${pascalCasePlural}(filtered);
+          return count
         } catch (error) {
           console.error("Error deleting", error);
         }
+        return 0
       };
 
       return { ${camelCasePlural}, create${pascalCase}, update${pascalCase}, delete${pascalCase} };
@@ -113,7 +115,8 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
     file,
     location: `${DIRECTORY}/hooks/${file.fileName}.ts`,
     type: "HOOK",
-    entity: "TABLE",
+    entityType: "TABLE",
+    entityName: tableName,
     usage,
   };
 };

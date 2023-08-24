@@ -79,7 +79,8 @@ const mapJoinTableToFile = async (
     file,
     location: `${DIRECTORY}/hooks/${file.fileName}.ts`,
     type: "HOOK",
-    entity: "TABLE",
+    entityType: "JOIN_TABLE",
+    entityName: joinTableFormats.name,
     usage,
   };
 };

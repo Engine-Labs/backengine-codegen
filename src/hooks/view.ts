@@ -108,7 +108,8 @@ const mapViewToFile = async (viewName: string): Promise<HookFile> => {
     file,
     location: `${DIRECTORY}/hooks/${file.fileName}.ts`,
     type: "HOOK",
-    entity: "VIEW",
+    entityType: "VIEW",
+    entityName: viewName,
     usage,
   };
 };
