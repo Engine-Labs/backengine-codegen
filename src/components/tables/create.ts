@@ -1,8 +1,8 @@
 import prettier from "prettier";
-import comment from "../comment";
-import type { ColumnResponse, TablesResponse } from "../pgMeta/fetchTables";
-import type { File, HookFile } from "../types";
-import { parseNameFormats } from "../utils";
+import comment from "../../comment";
+import type { ColumnResponse, TablesResponse } from "../../pgMeta/fetchTables";
+import type { File, HookFile } from "../../types";
+import { parseNameFormats } from "../../utils";
 
 const mapColumns = (
   columns?: ColumnResponse[]
@@ -15,9 +15,20 @@ const mapColumns = (
   const fields = filteredColumns.map((column) => `"${column.name}"`).join(",");
   const inputs = filteredColumns
     .map((column, index) => {
+      const label =
+        !column.isNullable && !column.defaultValue
+          ? `${column.name}*`
+          : column.name;
       return `
         <div className="flex items-center">
-          <label htmlFor="${column.name}">${column.name}</label>
+          <label 
+            htmlFor="${column.name}"
+            style={{
+              flexBasis: "120px",
+            }}
+          >
+            ${label}
+          </label>
           <input
             type="text"
             id="${column.name}"
@@ -61,7 +72,7 @@ export const mapHookFileToCreateComponent = async (
       "use client";
   
       import { FormEventHandler, MouseEventHandler, useState } from "react";
-      import type { Row, Insert${pascalCase} } from "../hooks/${fileName}";
+      import type { Row, Insert${pascalCase} } from "../../hooks/${fileName}";
 
       const fields: Array<keyof Insert${pascalCase}> = [${fields}]
   
@@ -79,14 +90,22 @@ export const mapHookFileToCreateComponent = async (
               }
               return newRow;
             }, {} as Record<keyof Insert${pascalCase}, any>);
-          onCreate(newRow).then((task) => {
-            if (task) {
-              setMessage("row with id " + task.id + " created!");
-              onFetch();
-            } else {
-              setMessage("failed to create row!");
-            }
-          });
+          onCreate(newRow)
+            .then((task) => {
+              if (task) {
+                setMessage("row with id " + task.id + " created!");
+                onFetch();
+              } else {
+                setMessage("failed to create row!");
+              }
+            })
+            .catch((error) => {
+              if (error.message) {
+                setMessage(error.message);
+              } else {
+                setMessage("failed to create row!");
+              }
+            });
         };
   
         const handleClick: MouseEventHandler<HTMLButtonElement> = () => {

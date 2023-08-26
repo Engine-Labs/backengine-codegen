@@ -43,19 +43,15 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
       };
 
       const create${pascalCase} = async (newData: Insert${pascalCase}) => {
-        try {
-          const { data, error } = await supabase
-            .from("${tableName}")
-            .insert([newData])
-            .select();
-          if (error) {
-            throw error;
-          }
-          set${pascalCasePlural}([...${camelCasePlural}, data[0]]);
-          return data[0]
-        } catch (error) {
-          console.error("Error creating", error);
+        const { data, error } = await supabase
+          .from("${tableName}")
+          .insert([newData])
+          .select();
+        if (error) {
+          throw error;
         }
+        set${pascalCasePlural}([...${camelCasePlural}, data[0]]);
+        return data[0]
       };
 
       const update${pascalCase} = async (id: Row["id"], updatedData: Update${pascalCase}) => {
@@ -79,21 +75,16 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
       };
 
       const delete${pascalCase} = async (id: Row["id"]): Promise<number | null> => {
-        try {
-          const { error, count } = await supabase
-            .from("${tableName}")
-            .delete({ count: "exact" })
-            .eq("id", id);
-          if (error) {
-            throw error;
-          }
-          const filtered = ${camelCasePlural}.filter((${camelCase}) => ${camelCase}.id !== id);
-          set${pascalCasePlural}(filtered);
-          return count
-        } catch (error) {
-          console.error("Error deleting", error);
+        const { error, count } = await supabase
+          .from("${tableName}")
+          .delete({ count: "exact" })
+          .eq("id", id);
+        if (error) {
+          throw error;
         }
-        return 0
+        const filtered = ${camelCasePlural}.filter((${camelCase}) => ${camelCase}.id !== id);
+        set${pascalCasePlural}(filtered);
+        return count
       };
 
       return { ${camelCasePlural}, fetch${pascalCasePlural}, create${pascalCase}, update${pascalCase}, delete${pascalCase} };

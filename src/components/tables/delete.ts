@@ -1,6 +1,6 @@
 import prettier from "prettier";
-import comment from "../comment";
-import type { File, HookFile } from "../types";
+import comment from "../../comment";
+import type { File, HookFile } from "../../types";
 
 export const mapHookFileToDeleteComponent = async (
   hookFile: HookFile
@@ -70,7 +70,14 @@ export const mapHookFileToDeleteComponent = async (
           >
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
               <div className="flex items-center">
-                <label htmlFor="id">ID:</label>
+                <label 
+                  htmlFor="id"
+                  style={{
+                    flexBasis: "120px",
+                  }}
+                >
+                  ID:
+                </label>
                 <input
                   type="text"
                   id="id"

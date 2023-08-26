@@ -1,7 +1,7 @@
 import prettier from "prettier";
-import comment from "../comment";
-import type { File, HookFile } from "../types";
-import { parseNameFormats } from "../utils";
+import comment from "../../comment";
+import type { File, HookFile } from "../../types";
+import { parseNameFormats } from "../../utils";
 
 export const mapHookFileToGetComponent = async (
   hookFile: HookFile
@@ -16,7 +16,7 @@ export const mapHookFileToGetComponent = async (
   const content = `
       ${comment}
   
-      import type { Row } from "../hooks/${fileName}";
+      import type { Row } from "../../hooks/${fileName}";
   
       export default function Get${componentName}({ ${camelCasePlural}, onFetch }: { ${camelCasePlural}: Row[], onFetch: () => Promise<void> }) {
         return (
@@ -25,7 +25,6 @@ export const mapHookFileToGetComponent = async (
               paddingTop: "20px",
             }}
           >
-            <code>${camelCasePlural}</code>
             <pre
               className="border rounded-md text-xs"
               style={{
