@@ -13,7 +13,11 @@ const writeFiles = async (
   supabaseFile: File,
   hookFiles: HookFile[],
   metadataFile: File,
-  componentFiles: { tableComponents: File[]; viewComponents: File[] }
+  componentFiles: {
+    tableComponents: File[];
+    joinTableComponents: File[];
+    viewComponents: File[];
+  }
 ) => {
   await writeFile(
     `${DIRECTORY}/${supabaseFile.fileName}`,
@@ -38,6 +42,14 @@ const writeFiles = async (
       );
     }
   );
+  const joinTableComponentPromises = componentFiles.joinTableComponents.map(
+    (componentFile) => {
+      return writeFile(
+        `${DIRECTORY}/components/joinTables/${componentFile.fileName}`,
+        componentFile.content
+      );
+    }
+  );
   const viewComponentPromises = componentFiles.viewComponents.map(
     (componentFile) => {
       return writeFile(
@@ -46,7 +58,11 @@ const writeFiles = async (
       );
     }
   );
-  await Promise.all([...tableComponentPromises, ...viewComponentPromises]);
+  await Promise.all([
+    ...tableComponentPromises,
+    ...joinTableComponentPromises,
+    ...viewComponentPromises,
+  ]);
 };
 
 const run = async () => {
@@ -56,6 +72,7 @@ const run = async () => {
   await remove(DIRECTORY);
   await ensureDir(`${DIRECTORY}/hooks`);
   await ensureDir(`${DIRECTORY}/components/tables`);
+  await ensureDir(`${DIRECTORY}/components/joinTables`);
   await ensureDir(`${DIRECTORY}/components/views`);
   await writeFile(`${DIRECTORY}/${types.fileName}`, types.content);
 

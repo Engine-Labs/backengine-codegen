@@ -76,7 +76,7 @@ export const mapHookFileToDeleteComponent = async (
                     flexBasis: "120px",
                   }}
                 >
-                  ID:
+                  ID
                 </label>
                 <input
                   type="text"
