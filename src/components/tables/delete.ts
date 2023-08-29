@@ -1,15 +1,23 @@
 import prettier from "prettier";
 import comment from "../../comment";
 import type { File, HookFile } from "../../types";
+import { TablesResponse } from "../../pgMeta/fetchTables";
 
 export const mapHookFileToDeleteComponent = async (
-  hookFile: HookFile
+  hookFile: HookFile,
+  tables: TablesResponse
 ): Promise<File> => {
   const {
     file: { fileName },
+    entityName,
   } = hookFile;
 
+  const table = tables.find((table) => table.name === entityName);
   const componentName = `${fileName.replace("use", "")}`;
+
+  const primaryKeyColumn = table?.columns?.find(
+    (column) => column.name === table?.primaryKeys.at(0)?.name
+  );
 
   const content = `
       ${comment}
@@ -17,8 +25,15 @@ export const mapHookFileToDeleteComponent = async (
       "use client";
   
       import { FormEventHandler, MouseEventHandler, useState } from "react";
+      import type { Row } from "../../hooks/${fileName}";
   
-      export default function Delete${componentName}({ onDelete, onFetch }: { onDelete: (id: number) => Promise<number | null>, onFetch: () => Promise<void> }) {
+      export default function Delete${componentName}({ 
+        onDelete, 
+        onFetch
+      }: { 
+        onDelete: (id: Row["id"]) => Promise<number | null>, 
+        onFetch: () => Promise<void> 
+      }) {
         const [message, setMessage] = useState<string>();
   
         const handleSubmit: FormEventHandler = (event) => {
@@ -73,10 +88,19 @@ export const mapHookFileToDeleteComponent = async (
                 <label 
                   htmlFor="id"
                   style={{
-                    flexBasis: "120px",
+                    flexBasis: "200px",
+                    marginRight: "10px"
                   }}
                 >
                   ID
+                </label>
+                <label 
+                  htmlFor="id"
+                  style={{
+                    flexBasis: "200px",
+                  }}
+                >
+                  ${primaryKeyColumn?.dataType}
                 </label>
                 <input
                   type="text"

@@ -67,8 +67,8 @@ export const parseComponentFilesForTables = async (
   const createComponentPromises = tableHookFiles.map((tableHookFile) =>
     mapHookFileToCreateComponent(tableHookFile, tables)
   );
-  const deleteComponentPromises = tableHookFiles.map(
-    mapHookFileToDeleteComponent
+  const deleteComponentPromises = tableHookFiles.map((tableHookFile) =>
+    mapHookFileToDeleteComponent(tableHookFile, tables)
   );
 
   const files = await Promise.all([

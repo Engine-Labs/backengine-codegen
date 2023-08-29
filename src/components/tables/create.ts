@@ -24,10 +24,19 @@ const mapColumns = (
           <label 
             htmlFor="${column.name}"
             style={{
-              flexBasis: "120px",
+              flexBasis: "200px",
+              marginRight: "10px"
             }}
           >
             ${label}
+          </label>
+          <label 
+            htmlFor="${column.name}"
+            style={{
+              flexBasis: "200px",
+            }}
+          >
+            ${column.dataType}
           </label>
           <input
             type="text"
