@@ -29,17 +29,17 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
       }, []);
 
       const fetch${pascalCasePlural} = async() => {
-          try {
-            const { data, error } = await supabase
-              .from("${tableName}")
-              .select();
-            if (error) {
-              throw error;
-            }
-            set${pascalCasePlural}(data || []);
-          } catch (error) {
-            console.error("Error fetching", error);
+        try {
+          const { data, error } = await supabase
+            .from("${tableName}")
+            .select();
+          if (error) {
+            throw error;
           }
+          set${pascalCasePlural}(data || []);
+        } catch (error) {
+          console.error("Error fetching", error);
+        }
       };
 
       const create${pascalCase} = async (newData: Insert${pascalCase}) => {
@@ -55,23 +55,20 @@ const mapTableToFile = async (table: TableResponse): Promise<HookFile> => {
       };
 
       const update${pascalCase} = async (id: Row["id"], updatedData: Update${pascalCase}) => {
-        try {
-          const { data, error } = await supabase
-            .from("${tableName}")
-            .update(updatedData)
-            .eq("id", id)
-            .select();
-          if (error) {
-            throw error;
-          }
-          set${pascalCasePlural}(
-            ${camelCasePlural}.map((${camelCase}) =>
-              ${camelCase}.id === id ? { ...${camelCase}, ...data[0] } : ${camelCase}
-            )
-          );
-        } catch (error) {
-          console.error("Error updating alert:", error);
+        const { data, error } = await supabase
+          .from("${tableName}")
+          .update(updatedData)
+          .eq("id", id)
+          .select();
+        if (error) {
+          throw error;
         }
+        set${pascalCasePlural}(
+          ${camelCasePlural}.map((${camelCase}) =>
+            ${camelCase}.id === id ? { ...${camelCase}, ...data[0] } : ${camelCase}
+          )
+        );
+        return data[0];
       };
 
       const delete${pascalCase} = async (id: Row["id"]): Promise<number | null> => {
