@@ -12,7 +12,8 @@ export type HookFile = {
   file: File;
   location: string;
   type: "HOOK";
-  entity: "TABLE" | "VIEW";
+  entityType: "TABLE" | "JOIN_TABLE" | "VIEW";
+  entityName: string;
   usage: string;
 };
 

@@ -1,6 +1,6 @@
 import prettier from "prettier";
 import comment from "../comment";
-import { TableResponse, TablesResponse } from "../pgMeta/fetchTables";
+import type { TableResponse, TablesResponse } from "../pgMeta/fetchTables";
 import type { File, HookFile } from "../types";
 import { DIRECTORY, parseNameFormats } from "../utils";
 
@@ -25,38 +25,30 @@ const mapJoinTableToFile = async (
     import { supabase } from "../supabase";
     import { Database } from "../types";
 
-    type ${tableOneFormats.pascalCase}Row = Database["public"]["Tables"]["${tableOneFormats.name}"]["Row"]
-    type ${tableTwoFormats.pascalCase}Row = Database["public"]["Tables"]["${tableTwoFormats.name}"]["Row"]
+    export type TableOneRow = Database["public"]["Tables"]["${tableOneFormats.name}"]["Row"]
+    export type TableTwoRow = Database["public"]["Tables"]["${tableTwoFormats.name}"]["Row"]
 
     const use${joinTableFormats.pascalCasePlural} = () => {
-      const ${tableOneFetchFunctionName} = async(id: ${tableOneFormats.pascalCase}Row["id"]) => {
-        try {
-          const { data, error } = await supabase
-            .from("${tableOneFormats.name}")
-            .select("*, ${tableTwoFormats.name}(*)")
-            .eq("id", id);
-          if (error) {
-            throw error;
-          }
-          return data
-        } catch (error) {
-          console.error("Error fetching", error);
+      const ${tableOneFetchFunctionName} = async(id: TableOneRow["id"]) => {
+        const { data, error } = await supabase
+          .from("${tableOneFormats.name}")
+          .select("*, ${tableTwoFormats.name}(*)")
+          .eq("id", id);
+        if (error) {
+          throw error;
         }
+        return data.map((d) => d.${tableTwoFormats.name}).flat();
       };
 
-      const ${tableTwoFetchFunctionName} = async(id: ${tableTwoFormats.pascalCase}Row["id"]) => {
-        try {
-          const { data, error } = await supabase
-            .from("${tableTwoFormats.name}")
-            .select("*, ${tableOneFormats.name}(*)")
-            .eq("id", id);
-          if (error) {
-            throw error;
-          }
-          return data
-        } catch (error) {
-          console.error("Error fetching", error);
+      const ${tableTwoFetchFunctionName} = async(id: TableTwoRow["id"]) => {
+        const { data, error } = await supabase
+          .from("${tableTwoFormats.name}")
+          .select("*, ${tableOneFormats.name}(*)")
+          .eq("id", id);
+        if (error) {
+          throw error;
         }
+        return data.map((d) => d.${tableOneFormats.name}).flat();
       };
 
       return { ${tableOneFetchFunctionName}, ${tableTwoFetchFunctionName} };
@@ -73,13 +65,14 @@ const mapJoinTableToFile = async (
     fileName: `use${joinTableFormats.pascalCasePlural}`,
     content: formattedContent,
   };
-  const usage = `const { ${tableOneFetchFunctionName} } = use${joinTableFormats.pascalCasePlural}();`;
+  const usage = `const { ${tableOneFetchFunctionName}, ${tableTwoFetchFunctionName} } = use${joinTableFormats.pascalCasePlural}();`;
 
   return {
     file,
     location: `${DIRECTORY}/hooks/${file.fileName}.ts`,
     type: "HOOK",
-    entity: "TABLE",
+    entityType: "JOIN_TABLE",
+    entityName: joinTableFormats.name,
     usage,
   };
 };

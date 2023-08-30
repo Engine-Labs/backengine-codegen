@@ -54,8 +54,7 @@ const parseViewNames = async (): Promise<string[]> => {
 };
 
 const mapViewToFile = async (viewName: string): Promise<HookFile> => {
-  const { pascalCase, pascalCasePlural, camelCasePlural } =
-    parseNameFormats(viewName);
+  const { pascalCasePlural, camelCasePlural } = parseNameFormats(viewName);
 
   const content = `
       ${comment}
@@ -65,30 +64,30 @@ const mapViewToFile = async (viewName: string): Promise<HookFile> => {
       import { Database } from "../types";
 
       type View = Database["public"]["Views"]["${viewName}"]
-      type ${pascalCase} = View["Row"];
+      export type Row = View["Row"];
 
       const use${pascalCasePlural} = () => {
-        const [${camelCasePlural}, set${pascalCasePlural}] = useState<${pascalCase}[]>([]);
+        const [${camelCasePlural}, set${pascalCasePlural}] = useState<Row[]>([]);
 
         useEffect(() => {
           fetch${pascalCasePlural}();
         }, []);
 
         const fetch${pascalCasePlural} = async() => {
-            try {
-              const { data, error } = await supabase
-                .from("${viewName}")
-                .select();
-              if (error) {
-                throw error;
-              }
-              set${pascalCasePlural}(data || []);
-            } catch (error) {
-              console.error("Error fetching", error);
+          try {
+            const { data, error } = await supabase
+              .from("${viewName}")
+              .select();
+            if (error) {
+              throw error;
             }
+            set${pascalCasePlural}(data || []);
+          } catch (error) {
+            console.error("Error fetching", error);
+          }
         };
 
-        return { ${camelCasePlural} };
+        return { ${camelCasePlural}, fetch${pascalCasePlural} };
       };
 
       export default use${pascalCasePlural};
@@ -108,7 +107,8 @@ const mapViewToFile = async (viewName: string): Promise<HookFile> => {
     file,
     location: `${DIRECTORY}/hooks/${file.fileName}.ts`,
     type: "HOOK",
-    entity: "VIEW",
+    entityType: "VIEW",
+    entityName: viewName,
     usage,
   };
 };

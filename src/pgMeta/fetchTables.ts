@@ -74,6 +74,7 @@ export async function fetchTables(): Promise<{
     (table) => table.schema === "public"
   );
 
+  // TODO: handle tables with a primary key column not named "id"
   const tables = publicTables.filter(({ primaryKeys }) =>
     primaryKeys.some(({ name }) => name === "id")
   );

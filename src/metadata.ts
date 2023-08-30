@@ -10,7 +10,8 @@ export const parseMetadataFile = async (
         name: hookFile.file.fileName,
         location: hookFile.location,
         type: hookFile.type,
-        entity: hookFile.entity,
+        entityType: hookFile.entityType,
+        entityName: hookFile.entityName,
         usage: hookFile.usage,
       };
     })
