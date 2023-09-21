@@ -11,6 +11,6 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["index.ts", "environment.ts"],
-  "exclude": ["demo", "dev-src"]
+  "include": ["index.ts", "app.ts", "environment.ts"],
+  "exclude": ["dev-src"]
 }
