@@ -2,6 +2,7 @@
   "name": "@backengine/codegen",
   "version": "2.0.1",
   "description": "Generate code for Backengine projects.",
+  "main": "build/app.js",
   "bin": "build/index.js",
   "files": [
     "build"
