@@ -1,5 +1,13 @@
 import { OpenAPIV3 } from "openapi-types";
 import { parseNameFormats } from "../utils";
+import { ReferenceObject, SchemaObject } from "openapi-typescript";
+
+export type HookMetadata = {
+  hookName: string;
+  usage: string;
+  parameters?: OpenAPIV3.ParameterObject[];
+  requestBody?: SchemaObject;
+};
 
 export function buildHookName(pathName: string) {
   const { pascalCase } = parseNameFormats(pathName);

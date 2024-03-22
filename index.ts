@@ -68,8 +68,8 @@ import openapiTS, { astToString } from "openapi-typescript";
 const run = async () => {
   log(`Starting code generation (v${version})`);
 
-  // const url = `https://backengine-staging-w4n0.fly.dev/api/docs/json`;
-  const url = "https://petstore3.swagger.io/api/v3/openapi.json";
+  const url = `https://backengine-staging-w4n0.fly.dev/api/docs/json`;
+  // const url = "https://petstore3.swagger.io/api/v3/openapi.json";
 
   const ast = await openapiTS(new URL(url));
   const contents = astToString(ast);
