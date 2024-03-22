@@ -68,12 +68,13 @@ import openapiTS, { astToString } from "openapi-typescript";
 const run = async () => {
   log(`Starting code generation (v${version})`);
 
-  const containerApiUrl = "https://backengine-staging-w4n0.fly.dev";
+  // const url = `https://backengine-staging-w4n0.fly.dev/api/docs/json`;
+  const url = "https://petstore3.swagger.io/api/v3/openapi.json";
 
-  const ast = await openapiTS(new URL(`${containerApiUrl}/api/docs/json`));
+  const ast = await openapiTS(new URL(url));
   const contents = astToString(ast);
 
-  const response = await axios.get(`${containerApiUrl}/api/docs/json`);
+  const response = await axios.get(url);
   const openApiDoc = (await SwaggerParser.dereference(
     response.data
   )) as OpenAPIV3.Document;
@@ -83,23 +84,9 @@ const run = async () => {
   await writeFile(`${DIRECTORY}/schema.ts`, contents);
   await ensureDir(`${DIRECTORY}/hooks`);
 
-  parseHookFiles(containerApiUrl, openApiDoc);
-  // const hookFiles = parseHookFiles();
+  parseHookFiles(url, openApiDoc);
 
-  // const types = await fetchTypes();
-
-  // await remove(DIRECTORY);
-  // await ensureDir(`${DIRECTORY}/hooks`);
-  // await ensureDir(`${DIRECTORY}/components/tables`);
-  // await ensureDir(`${DIRECTORY}/components/joinTables`);
-  // await ensureDir(`${DIRECTORY}/components/views`);
-  // await writeFile(`${DIRECTORY}/${types.fileName}`, types.content);
-
-  // const supabaseFile = await parseSupabaseFile();
-  // const hookFiles = await parseHookFiles();
   // const metadataFile = await parseMetadataFile(hookFiles);
-  // const componentFiles = await parseComponentFiles(hookFiles);
-
   // await writeFiles(supabaseFile, hookFiles, metadataFile, componentFiles);
 
   // log(`Generated ${hookFiles.length + 1} files in "${DIRECTORY}"`);

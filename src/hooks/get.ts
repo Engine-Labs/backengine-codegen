@@ -1,22 +1,26 @@
+import { writeFile } from "fs-extra";
+import { OpenAPIV3 } from "openapi-types";
 import prettier from "prettier";
 import comment from "../comment";
-import { DIRECTORY, parseNameFormats } from "../utils";
-import { writeFile } from "fs-extra";
+import { DIRECTORY } from "../utils";
+import { buildHookName, buildParameters, buildUrl } from "./utils";
 
 export async function generateGetHook(
   pathName: string,
-  containerApiUrl: string
+  containerApiUrl: string,
+  parameterObjects?: OpenAPIV3.ParameterObject[]
 ) {
-  const { pascalCase } = parseNameFormats(pathName);
+  const url = buildUrl(pathName, containerApiUrl);
+  const parameters = buildParameters(parameterObjects);
+  const hookName = buildHookName(pathName);
 
-  const hookName = `use${pascalCase.replace("Api", "")}Query`;
   const content = `
     ${comment}
 
     function ${hookName}() {
 
-      const fetchData = async () => {
-        const response = await fetch("${containerApiUrl}${pathName}");
+      const fetchData = async (${parameters}) => {
+        const response = await fetch(\`${url}\`);
         return response.json();
       }
 
@@ -32,6 +36,8 @@ export async function generateGetHook(
     parser: "typescript",
   });
 
-  // console.log(formattedContent);
+  // if (hookName === "usePetFindByTagQuery") {
+  console.log(formattedContent);
+  // }
   await writeFile(`${DIRECTORY}/hooks/${hookName}.ts`, formattedContent);
 }
