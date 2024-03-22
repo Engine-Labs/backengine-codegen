@@ -1,14 +1,28 @@
-import { fetchTables } from "../pgMeta/fetchTables";
+import { OpenAPIV3 } from "openapi-types";
 import type { HookFile } from "../types";
-import { parseTableFiles } from "./table";
-import { parseJoinTableFiles } from "./joinTable";
-import { parseViewFiles } from "./view";
+import { generateGetHook } from "./get";
+import { generatePostHook } from "./post";
 
-export const parseHookFiles = async (): Promise<HookFile[]> => {
-  const { tables, joinTables } = await fetchTables();
+// TODO: generated ts types
+// TODO: error/loading states
+// TODO: metadata files
+// TODO: use axios
+export const parseHookFiles = async (
+  containerApiUrl: string,
+  openApiDoc: OpenAPIV3.Document
+): Promise<HookFile[]> => {
+  const pathNames = Object.keys(openApiDoc.paths);
+  for (const pathName of pathNames) {
+    const path = openApiDoc.paths[pathName];
 
-  const tableFiles = await parseTableFiles(tables);
-  const joinTableFiles = await parseJoinTableFiles(joinTables);
-  const viewFiles = await parseViewFiles();
-  return [...tableFiles, ...joinTableFiles, ...viewFiles];
+    if (path?.get) {
+      await generateGetHook(pathName, containerApiUrl);
+    }
+    if (path?.post) {
+      await generatePostHook(pathName, containerApiUrl);
+    }
+    // TODO: patch, put, delete
+  }
+
+  return [];
 };
