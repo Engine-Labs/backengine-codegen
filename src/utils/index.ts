@@ -3,6 +3,7 @@ import {
   pascalCase as toPascalCase,
 } from "change-case-all";
 import gradient from "gradient-string";
+import { OpenAPIV3 } from "openapi-types";
 import { plural, singular } from "pluralize";
 
 const backengineGradient = gradient(["#00CB8A", "#78E0B8"]);
@@ -50,3 +51,9 @@ export const parseNameFormats = (
     camelCasePlural: sanitiseFormat(plural(toCamelCase(name))),
   };
 };
+
+export function isReferenceObject(
+  param: any
+): param is OpenAPIV3.ReferenceObject {
+  return typeof param === "object" && "$ref" in param;
+}
