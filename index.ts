@@ -68,13 +68,13 @@ import openapiTS, { astToString } from "openapi-typescript";
 const run = async () => {
   log(`Starting code generation (v${version})`);
 
-  const url = `https://backengine-staging-w4n0.fly.dev/api/docs/json`;
+  const url = `https://backengine-staging-446e.fly.dev`;
   // const url = "https://petstore3.swagger.io/api/v3/openapi.json";
 
-  const ast = await openapiTS(new URL(url));
+  const ast = await openapiTS(new URL(`${url}/api/docs/json`));
   const contents = astToString(ast);
 
-  const response = await axios.get(url);
+  const response = await axios.get(`${url}/api/docs/json`);
   const openApiDoc = (await SwaggerParser.dereference(
     response.data
   )) as OpenAPIV3.Document;
@@ -84,12 +84,8 @@ const run = async () => {
   await writeFile(`${DIRECTORY}/schema.ts`, contents);
   await ensureDir(`${DIRECTORY}/hooks`);
 
-  parseHookFiles(url, openApiDoc);
+  await parseHookFiles(url, openApiDoc);
 
-  // const metadataFile = await parseMetadataFile(hookFiles);
-  // await writeFiles(supabaseFile, hookFiles, metadataFile, componentFiles);
-
-  // log(`Generated ${hookFiles.length + 1} files in "${DIRECTORY}"`);
   log("Code generation completed 🚀");
 };
 

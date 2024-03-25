@@ -21,8 +21,9 @@ export async function generatePostHook(
 
   const url = buildUrl(pathName, containerApiUrl);
   const parameters = buildParameters(parameterObjects);
-  const hookName = buildHookName(pathName);
+  const hookName = buildHookName(pathName, "post");
 
+  // TODO: response type when not a 200 code
   const content = `
     ${comment}
 

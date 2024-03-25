@@ -1,85 +1,42 @@
+import { writeFile } from "fs-extra";
 import { OpenAPIV3 } from "openapi-types";
+import prettier from "prettier";
+import { DIRECTORY } from "../utils";
+import { generateLoginHook } from "./auth";
 import { generateGetHook } from "./get";
-import { generatePostHook } from "./post";
-import { HookMetadata } from "./utils";
+import type { HookMetadata } from "./types";
 
-type File = {
-  fileName: string;
-  content: string;
-};
-
-export type HookFile = {
-  file: File;
-  location: string;
-  type: "HOOK";
-  entityType: "TABLE" | "JOIN_TABLE" | "VIEW";
-  entityName: string;
-  usage: string;
-};
-
-// TODO: error/loading states
-// TODO: metadata files
-// TODO: use axios
 export const parseHookFiles = async (
   containerApiUrl: string,
   openApiDoc: OpenAPIV3.Document
-): Promise<HookFile[]> => {
+): Promise<void> => {
   const pathNames = Object.keys(openApiDoc.paths);
 
   const metadata: HookMetadata[] = [];
 
-  await Promise.all(
-    pathNames.map(async (pathName) => {
-      const path = openApiDoc.paths[pathName];
+  metadata.push(await generateLoginHook(containerApiUrl));
 
-      if (path?.get) {
-        metadata.push(
-          await generateGetHook(
-            pathName,
-            containerApiUrl,
-            path.get.parameters as OpenAPIV3.ParameterObject[]
-          )
-        );
-      }
-      if (path?.post) {
-        metadata.push(
-          await generatePostHook(
-            pathName,
-            containerApiUrl,
-            path.post.parameters as OpenAPIV3.ParameterObject[],
-            path.post.requestBody as OpenAPIV3.RequestBodyObject
-          )
-        );
-      }
-    })
+  await Promise.all(
+    pathNames
+      .filter((pathName) => !["/api/login", "/api/signup"].includes(pathName))
+      .map(async (pathName) => {
+        const path = openApiDoc.paths[pathName];
+
+        if (path?.get) {
+          metadata.push(
+            await generateGetHook(
+              pathName,
+              containerApiUrl,
+              path.get.parameters as OpenAPIV3.ParameterObject[]
+            )
+          );
+        }
+        // TODO: post, put, delete, patch
+      })
   );
 
-  console.log(JSON.stringify(metadata, null, 2));
-  // for (const pathName of pathNames) {
-  //   const path = openApiDoc.paths[pathName];
-
-  //   const metadata: HookMetadata[] = [];
-  //   if (path?.get) {
-  //     metadata.push(
-  //       await generateGetHook(
-  //         pathName,
-  //         containerApiUrl,
-  //         path.get.parameters as OpenAPIV3.ParameterObject[]
-  //       )
-  //     );
-  //   }
-  //   if (path?.post) {
-  //     metadata.push(
-  //       await generatePostHook(
-  //         pathName,
-  //         containerApiUrl,
-  //         path.post.parameters as OpenAPIV3.ParameterObject[],
-  //         path.post.requestBody as OpenAPIV3.RequestBodyObject
-  //       )
-  //     );
-  //   }
-  //   // TODO: patch, put, delete
-  // }
-
-  return [];
+  const formattedContent = await prettier.format(JSON.stringify(metadata), {
+    parser: "json",
+  });
+  await writeFile(`${DIRECTORY}/metadata.json`, formattedContent);
 };
