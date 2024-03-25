@@ -4,7 +4,12 @@ import prettier from "prettier";
 import comment from "../comment";
 import { DIRECTORY } from "../utils";
 import type { HookMetadata } from "./types";
-import { buildHookName, buildParameters, buildUrl } from "./utils";
+import {
+  buildHookName,
+  buildParameters,
+  buildParametersWithoutType,
+  buildUrl,
+} from "./utils";
 
 export async function generateGetHook(
   pathName: string,
@@ -20,7 +25,7 @@ export async function generateGetHook(
 
     import { useCallback, useEffect, useState } from "react";
 
-    function ${hookName}() {
+    function ${hookName}(${parameters}) {
       const [isError, setIsError] = useState(false);
       const [isLoading, setIsLoading] = useState(false);
       const [data, setData] = useState<unknown>();
@@ -30,7 +35,7 @@ export async function generateGetHook(
         return token ? { Authorization: \`Bearer \${token}\` } : {};
       };
 
-      const fetchData = useCallback(async (${parameters}) => {
+      const fetchData = useCallback(async () => {
         const response = await fetch(
           \`${url}\`,
           {
@@ -70,7 +75,9 @@ export async function generateGetHook(
 
   return {
     hookName,
-    definition: `const { data, isError, isLoading } = ${hookName}();`,
+    definition: `const { data, isError, isLoading } = ${hookName}(${buildParametersWithoutType(
+      parameterObjects
+    )});`,
     import: `import ${hookName} from "../../__backengine__/hooks/${hookName}";`,
     parameters: parameterObjects,
   };

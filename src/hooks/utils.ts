@@ -27,3 +27,23 @@ export function buildParameters(parameters?: OpenAPIV3.ParameterObject[]) {
     })
     .join(", ");
 }
+
+export function buildParametersWithoutType(
+  parameters?: OpenAPIV3.ParameterObject[]
+) {
+  if (!parameters) {
+    return "";
+  }
+
+  // TODO: query parameters
+  return parameters
+    .filter((param) => param.in === "path")
+    .map((param) => {
+      const value =
+        (param.schema as OpenAPIV3.SchemaObject).type === "string"
+          ? `"${param.name}"`
+          : 10;
+      return value;
+    })
+    .join(", ");
+}
