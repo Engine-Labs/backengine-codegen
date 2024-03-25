@@ -5,9 +5,9 @@ import comment from "../comment";
 import { DIRECTORY } from "../utils";
 import type { HookMetadata } from "./types";
 import {
+  buildExampleParameters,
   buildHookName,
   buildParameters,
-  buildParametersWithoutType,
   buildUrl,
 } from "./utils";
 
@@ -17,7 +17,8 @@ export async function generateGetHook(
   parameterObjects?: OpenAPIV3.ParameterObject[]
 ): Promise<HookMetadata> {
   const url = buildUrl(pathName, containerApiUrl);
-  const parameters = buildParameters(parameterObjects);
+  const parameters = buildParameters(false, parameterObjects);
+  const parametersWithTypes = buildParameters(true, parameterObjects);
   const hookName = buildHookName(pathName);
 
   const content = `
@@ -25,7 +26,7 @@ export async function generateGetHook(
 
     import { useCallback, useEffect, useState } from "react";
 
-    function ${hookName}(${parameters}) {
+    function ${hookName}(${parametersWithTypes}) {
       const [isError, setIsError] = useState(false);
       const [isLoading, setIsLoading] = useState(false);
       const [data, setData] = useState<unknown>();
@@ -43,7 +44,7 @@ export async function generateGetHook(
           }
         );
         setData(await response.json());
-      }, []);
+      }, [${parameters}]);
 
 
       useEffect(() => {
@@ -73,11 +74,10 @@ export async function generateGetHook(
 
   await writeFile(`${DIRECTORY}/hooks/${hookName}.ts`, formattedContent);
 
+  const exampleParameters = buildExampleParameters(parameterObjects);
   return {
     hookName,
-    definition: `const { data, isError, isLoading } = ${hookName}(${buildParametersWithoutType(
-      parameterObjects
-    )});`,
+    definition: `const { data, isError, isLoading } = ${hookName}(${exampleParameters});`,
     import: `import ${hookName} from "../../__backengine__/hooks/${hookName}";`,
     parameters: parameterObjects,
   };

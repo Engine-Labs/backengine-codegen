@@ -13,22 +13,8 @@ export function buildUrl(pathName: string, containerApiUrl: string) {
   return `${containerApiUrl}${pathName}`.replaceAll("{", "${");
 }
 
-export function buildParameters(parameters?: OpenAPIV3.ParameterObject[]) {
-  if (!parameters) {
-    return "";
-  }
-
-  // TODO: query parameters
-  return parameters
-    .filter((param) => param.in === "path")
-    .map((param) => {
-      const type = (param.schema as OpenAPIV3.SchemaObject)?.type ?? "string";
-      return `${param.name}${param.required ? "" : "?"}: ${type}`;
-    })
-    .join(", ");
-}
-
-export function buildParametersWithoutType(
+export function buildParameters(
+  withType: boolean,
   parameters?: OpenAPIV3.ParameterObject[]
 ) {
   if (!parameters) {
@@ -39,8 +25,29 @@ export function buildParametersWithoutType(
   return parameters
     .filter((param) => param.in === "path")
     .map((param) => {
+      if (!withType) {
+        return param.name;
+      }
+      const type = (param.schema as OpenAPIV3.SchemaObject)?.type ?? "string";
+      return `${param.name}${param.required ? "" : "?"}: ${type}`;
+    })
+    .join(", ");
+}
+
+export function buildExampleParameters(
+  parameters?: OpenAPIV3.ParameterObject[]
+) {
+  if (!parameters) {
+    return "";
+  }
+
+  // TODO: query parameters
+  return parameters
+    .filter((param) => param.in === "path")
+    .map((param) => {
+      // TODO: handle other types
       const value =
-        (param.schema as OpenAPIV3.SchemaObject).type === "string"
+        (param.schema as OpenAPIV3.SchemaObject)?.type === "string"
           ? `"${param.name}"`
           : 10;
       return value;
