@@ -1,56 +1,75 @@
 import { OpenAPIV3 } from "openapi-types";
 import { parseNameFormats } from "../utils";
 
-export function buildHookName(pathName: string, method?: string) {
+export function parseHookName(pathName: string, method: string) {
   const { pascalCase } = parseNameFormats(pathName);
-  if (method === "post") {
-    return `use${pascalCase.replace("Api", "")}Mutation`;
+  if (method === "get") {
+    return `use${pascalCase.replace("Api", "")}Query`;
   }
-  return `use${pascalCase.replace("Api", "")}Query`;
+  return `use${pascalCase.replace("Api", "")}Mutation`;
 }
 
-export function buildUrl(pathName: string, containerApiUrl: string) {
+export function parseURL(pathName: string, containerApiUrl: string) {
   return `${containerApiUrl}${pathName}`.replaceAll("{", "${");
 }
 
-export function buildParameters(
-  withType: boolean,
+export function appendQueryParametersToURL(
   parameters?: OpenAPIV3.ParameterObject[]
 ) {
   if (!parameters) {
     return "";
   }
 
-  // TODO: query parameters
   return parameters
-    .filter((param) => param.in === "path")
+    .filter((param) => param.in === "query")
     .map((param) => {
-      if (!withType) {
-        return param.name;
+      return `if (${param.name} !== undefined) {
+        url.searchParams.set("${param.name}", ${param.name});
+      }`;
+    })
+    .join("\n\n");
+}
+
+export function callbackDependencies(parameters?: OpenAPIV3.ParameterObject[]) {
+  if (!parameters) {
+    return "";
+  }
+
+  return parameters.map((param) => param.name).join(", ");
+}
+
+export function hookParameters(parameters?: OpenAPIV3.ParameterObject[]) {
+  if (!parameters) {
+    return "";
+  }
+
+  return parameters
+    .map((param) => {
+      let type = (param.schema as OpenAPIV3.SchemaObject)?.type ?? "string";
+      if (type === "integer") {
+        return `${param.name}${param.required ? "" : "?"}: number`;
       }
-      const type = (param.schema as OpenAPIV3.SchemaObject)?.type ?? "string";
       return `${param.name}${param.required ? "" : "?"}: ${type}`;
     })
     .join(", ");
 }
 
-export function buildExampleParameters(
-  parameters?: OpenAPIV3.ParameterObject[]
-) {
+export function definitionParameters(parameters?: OpenAPIV3.ParameterObject[]) {
   if (!parameters) {
     return "";
   }
 
   // TODO: query parameters
   return parameters
-    .filter((param) => param.in === "path")
     .map((param) => {
-      // TODO: handle other types
-      const value =
-        (param.schema as OpenAPIV3.SchemaObject)?.type === "string"
-          ? `"${param.name}"`
-          : 10;
-      return value;
+      const type = (param.schema as OpenAPIV3.SchemaObject)?.type;
+      if (type === "integer") {
+        return 10;
+      }
+      if (type === "boolean") {
+        return false;
+      }
+      return `"${param.name}"`;
     })
     .join(", ");
 }

@@ -5,10 +5,12 @@ import comment from "../comment";
 import { DIRECTORY } from "../utils";
 import type { HookMetadata } from "./types";
 import {
-  buildExampleParameters,
-  buildHookName,
-  buildParameters,
-  buildUrl,
+  appendQueryParametersToURL,
+  callbackDependencies,
+  definitionParameters,
+  hookParameters,
+  parseHookName,
+  parseURL,
 } from "./utils";
 
 export async function generateGetHook(
@@ -16,17 +18,15 @@ export async function generateGetHook(
   containerApiUrl: string,
   parameterObjects?: OpenAPIV3.ParameterObject[]
 ): Promise<HookMetadata> {
-  const url = buildUrl(pathName, containerApiUrl);
-  const parameters = buildParameters(false, parameterObjects);
-  const parametersWithTypes = buildParameters(true, parameterObjects);
-  const hookName = buildHookName(pathName);
+  const url = parseURL(pathName, containerApiUrl);
+  const hookName = parseHookName(pathName, "get");
 
   const content = `
     ${comment}
 
     import { useCallback, useEffect, useState } from "react";
 
-    function ${hookName}(${parametersWithTypes}) {
+    function ${hookName}(${hookParameters(parameterObjects)}) {
       const [isError, setIsError] = useState(false);
       const [isLoading, setIsLoading] = useState(false);
       const [data, setData] = useState<unknown>();
@@ -37,14 +37,18 @@ export async function generateGetHook(
       };
 
       const fetchData = useCallback(async () => {
+        const url = new URL(\`${url}\`);
+
+        ${appendQueryParametersToURL(parameterObjects)}
+
         const response = await fetch(
-          \`${url}\`,
+          url.toString(),
           {
             headers: headers(),
           }
         );
         setData(await response.json());
-      }, [${parameters}]);
+      }, [${callbackDependencies(parameterObjects)}]);
 
 
       useEffect(() => {
@@ -72,13 +76,16 @@ export async function generateGetHook(
     parser: "typescript",
   });
 
+  // console.log(formattedContent);
+
   await writeFile(`${DIRECTORY}/hooks/${hookName}.ts`, formattedContent);
 
-  const exampleParameters = buildExampleParameters(parameterObjects);
   return {
     hookName,
-    definition: `const { data, isError, isLoading } = ${hookName}(${exampleParameters});`,
-    import: `import ${hookName} from "../../__backengine__/hooks/${hookName}";`,
+    definition: `const { data, isError, isLoading } = ${hookName}(${definitionParameters(
+      parameterObjects
+    )});`,
+    import: `import ${hookName} from "@/__backengine__/hooks/${hookName}";`,
     parameters: parameterObjects,
   };
 }

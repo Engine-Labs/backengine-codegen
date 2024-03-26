@@ -2,7 +2,7 @@ import { writeFile } from "fs-extra";
 import prettier from "prettier";
 import comment from "../comment";
 import { DIRECTORY } from "../utils";
-import { buildUrl } from "./utils";
+import { parseURL } from "./utils";
 import type { HookMetadata } from "./types";
 
 export async function generateLoginHook(
@@ -10,7 +10,7 @@ export async function generateLoginHook(
 ): Promise<HookMetadata> {
   const pathName = "/api/login";
 
-  const url = buildUrl(pathName, containerApiUrl);
+  const url = parseURL(pathName, containerApiUrl);
 
   const content = `
     ${comment}
@@ -52,6 +52,6 @@ export async function generateLoginHook(
   return {
     hookName,
     definition: `const { data, isError, isLoading } = ${hookName}();`,
-    import: `import ${hookName} from "../../__backengine__/hooks/${hookName}";`,
+    import: `import ${hookName} from "@/__backengine__/hooks/${hookName}";`,
   };
 }

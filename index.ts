@@ -72,9 +72,11 @@ const run = async () => {
   // const url = "https://petstore3.swagger.io/api/v3/openapi.json";
 
   const ast = await openapiTS(new URL(`${url}/api/docs/json`));
+  // const ast = await openapiTS(new URL(`${url}`));
   const contents = astToString(ast);
 
   const response = await axios.get(`${url}/api/docs/json`);
+  // const response = await axios.get(`${url}`);
   const openApiDoc = (await SwaggerParser.dereference(
     response.data
   )) as OpenAPIV3.Document;
