@@ -85,7 +85,7 @@ export async function generateGetHook(
     definition: `const { data, isError, isLoading } = ${hookName}(${definitionParameters(
       parameterObjects
     )});`,
-    import: `import ${hookName} from "@/__backengine__/hooks/${hookName}";`,
+    import: `import ${hookName} from "@/backengine/hooks/${hookName}";`,
     parameters: parameterObjects,
   };
 }
