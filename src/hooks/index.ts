@@ -17,22 +17,21 @@ export const parseHookFiles = async (
   metadata.push(await generateLoginHook(containerApiUrl));
 
   await Promise.all(
-    pathNames
-      .filter((pathName) => !["/api/login", "/api/signup"].includes(pathName))
-      .map(async (pathName) => {
-        const path = openApiDoc.paths[pathName];
+    pathNames.map(async (pathName): Promise<void> => {
+      const path = openApiDoc.paths[pathName];
 
-        if (path?.get) {
-          metadata.push(
-            await generateGetHook(
-              pathName,
-              containerApiUrl,
-              path.get.parameters as OpenAPIV3.ParameterObject[]
-            )
-          );
-        }
-        // TODO: post, put, delete, patch
-      })
+      if (path?.get) {
+        metadata.push(
+          await generateGetHook(
+            pathName,
+            containerApiUrl,
+            path.get.responses,
+            path.get.parameters as OpenAPIV3.ParameterObject[]
+          )
+        );
+      }
+      // TODO: post, put, delete, patch
+    })
   );
 
   const formattedContent = await prettier.format(JSON.stringify(metadata), {

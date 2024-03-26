@@ -19,4 +19,5 @@ export type HookMetadata = {
   definition: string;
   import: string;
   parameters?: OpenAPIV3.ParameterObject[];
+  response?: OpenAPIV3.MediaTypeObject;
 };

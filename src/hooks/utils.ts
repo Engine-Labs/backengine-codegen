@@ -1,5 +1,5 @@
 import { OpenAPIV3 } from "openapi-types";
-import { parseNameFormats } from "../utils";
+import { isReferenceObject, parseNameFormats } from "../utils";
 
 export function parseHookName(pathName: string, method: string) {
   const { pascalCase } = parseNameFormats(pathName);
@@ -72,4 +72,20 @@ export function definitionParameters(parameters?: OpenAPIV3.ParameterObject[]) {
       return `"${param.name}"`;
     })
     .join(", ");
+}
+
+export function parseResponse(
+  responses: OpenAPIV3.ResponsesObject
+): OpenAPIV3.MediaTypeObject | undefined {
+  const successKey = Object.keys(responses).find((key) => key.startsWith("2"));
+  if (!successKey) {
+    return;
+  }
+
+  const successResponse = responses[successKey];
+  if (isReferenceObject(successResponse) || !successResponse.content) {
+    return;
+  }
+
+  return successResponse.content["application/json"];
 }

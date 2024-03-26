@@ -9,74 +9,23 @@ import { DIRECTORY, log, logError } from "./src/utils";
 import { parseHookFiles } from "./src/hooks";
 import openapiTS, { astToString } from "openapi-typescript";
 
-// const writeFiles = async (
-//   supabaseFile: File,
-//   hookFiles: HookFile[],
-//   metadataFile: File,
-//   componentFiles: {
-//     tableComponents: File[];
-//     joinTableComponents: File[];
-//     viewComponents: File[];
-//   }
-// ) => {
-//   await writeFile(
-//     `${DIRECTORY}/${supabaseFile.fileName}`,
-//     supabaseFile.content
-//   );
-//   await Promise.all(
-//     hookFiles.map((hookFile) => {
-//       const { file, location } = hookFile;
-//       return writeFile(location, file.content);
-//     })
-//   );
-//   await writeFile(
-//     `${DIRECTORY}/${metadataFile.fileName}`,
-//     metadataFile.content
-//   );
-
-//   const tableComponentPromises = componentFiles.tableComponents.map(
-//     (componentFile) => {
-//       return writeFile(
-//         `${DIRECTORY}/components/tables/${componentFile.fileName}`,
-//         componentFile.content
-//       );
-//     }
-//   );
-//   const joinTableComponentPromises = componentFiles.joinTableComponents.map(
-//     (componentFile) => {
-//       return writeFile(
-//         `${DIRECTORY}/components/joinTables/${componentFile.fileName}`,
-//         componentFile.content
-//       );
-//     }
-//   );
-//   const viewComponentPromises = componentFiles.viewComponents.map(
-//     (componentFile) => {
-//       return writeFile(
-//         `${DIRECTORY}/components/views/${componentFile.fileName}`,
-//         componentFile.content
-//       );
-//     }
-//   );
-//   await Promise.all([
-//     ...tableComponentPromises,
-//     ...joinTableComponentPromises,
-//     ...viewComponentPromises,
-//   ]);
-// };
+const isPetstore = false;
 
 const run = async () => {
   log(`Starting code generation (v${version})`);
 
-  const url = `https://backengine-staging-446e.fly.dev`;
-  // const url = "https://petstore3.swagger.io/api/v3/openapi.json";
+  const url = isPetstore
+    ? "https://petstore3.swagger.io/api/v3/openapi.json"
+    : `https://backengine-staging-446e.fly.dev`;
 
-  const ast = await openapiTS(new URL(`${url}/api/docs/json`));
-  // const ast = await openapiTS(new URL(`${url}`));
+  const ast = isPetstore
+    ? await openapiTS(new URL(`${url}`))
+    : await openapiTS(new URL(`${url}/api/docs/json`));
   const contents = astToString(ast);
 
-  const response = await axios.get(`${url}/api/docs/json`);
-  // const response = await axios.get(`${url}`);
+  const response = isPetstore
+    ? await axios.get(`${url}`)
+    : await axios.get(`${url}/api/docs/json`);
   const openApiDoc = (await SwaggerParser.dereference(
     response.data
   )) as OpenAPIV3.Document;

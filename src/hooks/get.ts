@@ -10,12 +10,14 @@ import {
   definitionParameters,
   hookParameters,
   parseHookName,
+  parseResponse,
   parseURL,
 } from "./utils";
 
 export async function generateGetHook(
   pathName: string,
   containerApiUrl: string,
+  responses: OpenAPIV3.ResponsesObject,
   parameterObjects?: OpenAPIV3.ParameterObject[]
 ): Promise<HookMetadata> {
   const url = parseURL(pathName, containerApiUrl);
@@ -80,12 +82,25 @@ export async function generateGetHook(
 
   await writeFile(`${DIRECTORY}/hooks/${hookName}.ts`, formattedContent);
 
+  return buildMetadata(hookName, responses, parameterObjects);
+}
+
+function buildMetadata(
+  hookName: string,
+  responses: OpenAPIV3.ResponsesObject,
+  parameterObjects?: OpenAPIV3.ParameterObject[]
+): HookMetadata {
+  const definition = `const { data, isError, isLoading } = ${hookName}(${definitionParameters(
+    parameterObjects
+  )});`;
+  const importValue = `import ${hookName} from "@/backengine/hooks/${hookName}";`;
+  const response = parseResponse(responses);
+
   return {
     hookName,
-    definition: `const { data, isError, isLoading } = ${hookName}(${definitionParameters(
-      parameterObjects
-    )});`,
-    import: `import ${hookName} from "@/backengine/hooks/${hookName}";`,
+    definition,
+    import: importValue,
     parameters: parameterObjects,
+    response,
   };
 }
