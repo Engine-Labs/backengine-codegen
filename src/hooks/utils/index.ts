@@ -1,5 +1,5 @@
 import { OpenAPIV3 } from "openapi-types";
-import { isReferenceObject, parseNameFormats } from "../utils";
+import { parseNameFormats } from "../../utils";
 
 export function parseHookName(pathName: string, method: string) {
   const { pascalCase } = parseNameFormats(pathName);

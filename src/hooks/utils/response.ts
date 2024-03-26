@@ -1,16 +1,16 @@
 import { compile } from "json-schema-to-typescript";
 import { OpenAPIV3 } from "openapi-types";
-import { isReferenceObject } from "./utils";
+import { isReferenceObject } from "../../utils";
 
 export async function createResponseType(
   responses: OpenAPIV3.ResponsesObject,
   name: string
-): Promise<string | undefined> {
+): Promise<string> {
   const successResponse = parseResponse(responses);
 
   const schema = successResponse?.schema;
   if (!schema || isReferenceObject(schema)) {
-    return;
+    return `export type ${name} = unknown;`;
   }
 
   return await compile(schema, name, {

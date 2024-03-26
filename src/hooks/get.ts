@@ -2,9 +2,9 @@ import { writeFile } from "fs-extra";
 import { OpenAPIV3 } from "openapi-types";
 import prettier from "prettier";
 import comment from "../comment";
-import { createResponseType, parseResponse } from "../test";
 import { DIRECTORY, parseNameFormats } from "../utils";
 import type { HookMetadata } from "./types";
+import { createResponseType, parseResponse } from "./utils/response";
 import {
   appendQueryParametersToURL,
   callbackDependencies,
@@ -20,10 +20,6 @@ export async function generateGetHook(
   responses: OpenAPIV3.ResponsesObject,
   parameterObjects?: OpenAPIV3.ParameterObject[]
 ): Promise<HookMetadata> {
-  if (pathName !== "/pet/{petId}") {
-    return;
-  }
-
   const url = parseURL(pathName, containerApiUrl);
   const hookName = parseHookName(pathName, "get");
 
