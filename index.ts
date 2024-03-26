@@ -9,7 +9,7 @@ import { DIRECTORY, log, logError } from "./src/utils";
 import { parseHookFiles } from "./src/hooks";
 import openapiTS, { astToString } from "openapi-typescript";
 
-const isPetstore = false;
+const isPetstore = true;
 
 const run = async () => {
   log(`Starting code generation (v${version})`);

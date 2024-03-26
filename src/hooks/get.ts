@@ -2,7 +2,8 @@ import { writeFile } from "fs-extra";
 import { OpenAPIV3 } from "openapi-types";
 import prettier from "prettier";
 import comment from "../comment";
-import { DIRECTORY } from "../utils";
+import { createResponseType, parseResponse } from "../test";
+import { DIRECTORY, parseNameFormats } from "../utils";
 import type { HookMetadata } from "./types";
 import {
   appendQueryParametersToURL,
@@ -10,7 +11,6 @@ import {
   definitionParameters,
   hookParameters,
   parseHookName,
-  parseResponse,
   parseURL,
 } from "./utils";
 
@@ -20,18 +20,28 @@ export async function generateGetHook(
   responses: OpenAPIV3.ResponsesObject,
   parameterObjects?: OpenAPIV3.ParameterObject[]
 ): Promise<HookMetadata> {
+  if (pathName !== "/pet/{petId}") {
+    return;
+  }
+
   const url = parseURL(pathName, containerApiUrl);
   const hookName = parseHookName(pathName, "get");
+
+  const { pascalCase } = parseNameFormats(pathName);
+  const responseTypeName = `${pascalCase}Response`;
+  const responseType = await createResponseType(responses, responseTypeName);
 
   const content = `
     ${comment}
 
     import { useCallback, useEffect, useState } from "react";
 
+    ${responseType}
+
     function ${hookName}(${hookParameters(parameterObjects)}) {
       const [isError, setIsError] = useState(false);
       const [isLoading, setIsLoading] = useState(false);
-      const [data, setData] = useState<unknown>();
+      const [data, setData] = useState<${responseTypeName}>();
 
       const headers = (): HeadersInit => {
         const token = localStorage.getItem("engine-token");
@@ -78,9 +88,11 @@ export async function generateGetHook(
     parser: "typescript",
   });
 
-  // console.log(formattedContent);
+  console.log(formattedContent);
 
   await writeFile(`${DIRECTORY}/hooks/${hookName}.ts`, formattedContent);
+
+  // TODO: don't take whole openApiDoc
 
   return buildMetadata(hookName, responses, parameterObjects);
 }

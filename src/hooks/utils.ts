@@ -73,19 +73,3 @@ export function definitionParameters(parameters?: OpenAPIV3.ParameterObject[]) {
     })
     .join(", ");
 }
-
-export function parseResponse(
-  responses: OpenAPIV3.ResponsesObject
-): OpenAPIV3.MediaTypeObject | undefined {
-  const successKey = Object.keys(responses).find((key) => key.startsWith("2"));
-  if (!successKey) {
-    return;
-  }
-
-  const successResponse = responses[successKey];
-  if (isReferenceObject(successResponse) || !successResponse.content) {
-    return;
-  }
-
-  return successResponse.content["application/json"];
-}
