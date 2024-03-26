@@ -84,11 +84,9 @@ export async function generateGetHook(
     parser: "typescript",
   });
 
-  console.log(formattedContent);
+  // console.log(formattedContent);
 
   await writeFile(`${DIRECTORY}/hooks/${hookName}.ts`, formattedContent);
-
-  // TODO: don't take whole openApiDoc
 
   return buildMetadata(hookName, responses, parameterObjects);
 }

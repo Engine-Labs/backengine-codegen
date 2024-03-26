@@ -1,5 +1,5 @@
 import { OpenAPIV3 } from "openapi-types";
-import { parseNameFormats } from "../../utils";
+import { isReferenceObject, parseNameFormats } from "../../utils";
 
 export function parseHookName(pathName: string, method: string) {
   const { pascalCase } = parseNameFormats(pathName);
@@ -23,6 +23,14 @@ export function appendQueryParametersToURL(
   return parameters
     .filter((param) => param.in === "query")
     .map((param) => {
+      const type = (param.schema as OpenAPIV3.SchemaObject)?.type ?? "string";
+
+      if (type === "array") {
+        return `if (${param.name} !== undefined) {
+          url.searchParams.set("${param.name}", ${param.name}.join(","));
+        }`;
+      }
+
       return `if (${param.name} !== undefined) {
         url.searchParams.set("${param.name}", ${param.name});
       }`;
@@ -43,12 +51,23 @@ export function hookParameters(parameters?: OpenAPIV3.ParameterObject[]) {
     return "";
   }
 
+  // TODO: handle optional parameters (should always be after required parameters)
   return parameters
     .map((param) => {
-      let type = (param.schema as OpenAPIV3.SchemaObject)?.type ?? "string";
+      const type = (param.schema as OpenAPIV3.SchemaObject)?.type ?? "string";
+
       if (type === "integer") {
         return `${param.name}${param.required ? "" : "?"}: number`;
       }
+
+      if (type === "array") {
+        const items = (param.schema as OpenAPIV3.ArraySchemaObject)?.items;
+        if (isReferenceObject(items) || !items.type) {
+          return `${param.name}${param.required ? "" : "?"}: string[]`;
+        }
+        return `${param.name}${param.required ? "" : "?"}: ${items.type}[]`;
+      }
+
       return `${param.name}${param.required ? "" : "?"}: ${type}`;
     })
     .join(", ");
@@ -59,7 +78,6 @@ export function definitionParameters(parameters?: OpenAPIV3.ParameterObject[]) {
     return "";
   }
 
-  // TODO: query parameters
   return parameters
     .map((param) => {
       const type = (param.schema as OpenAPIV3.SchemaObject)?.type;
@@ -68,6 +86,9 @@ export function definitionParameters(parameters?: OpenAPIV3.ParameterObject[]) {
       }
       if (type === "boolean") {
         return false;
+      }
+      if (type === "array") {
+        return "[]";
       }
       return `"${param.name}"`;
     })
