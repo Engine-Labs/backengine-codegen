@@ -9,14 +9,14 @@ import { DIRECTORY, log, logError } from "./src/utils";
 import { parseHookFiles } from "./src/hooks";
 import openapiTS, { astToString } from "openapi-typescript";
 
-const isPetstore = true;
+const isPetstore = false;
 
 const run = async () => {
   log(`Starting code generation (v${version})`);
 
   const url = isPetstore
     ? "https://petstore3.swagger.io/api/v3/openapi.json"
-    : `https://backengine-staging-446e.fly.dev`;
+    : `https://backengine-staging-cnsq.fly.dev`;
 
   const ast = isPetstore
     ? await openapiTS(new URL(`${url}`))

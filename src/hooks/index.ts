@@ -3,8 +3,16 @@ import { OpenAPIV3 } from "openapi-types";
 import prettier from "prettier";
 import { DIRECTORY } from "../utils";
 import { generateLoginHook } from "./auth";
-import { generateGetHook } from "./get";
-import type { HookMetadata } from "./types";
+import { generateGetHook, generatePostHook } from "./methods";
+
+export type HookMetadata = {
+  hookName: string;
+  definition: string;
+  import: string;
+  parameters?: OpenAPIV3.ParameterObject[];
+  response?: OpenAPIV3.MediaTypeObject;
+  request?: OpenAPIV3.MediaTypeObject;
+};
 
 export const parseHookFiles = async (
   containerApiUrl: string,
@@ -17,21 +25,35 @@ export const parseHookFiles = async (
   metadata.push(await generateLoginHook(containerApiUrl));
 
   await Promise.all(
-    pathNames.map(async (pathName): Promise<void> => {
-      const path = openApiDoc.paths[pathName];
+    pathNames
+      .filter((pathName) => pathName !== "/api/login")
+      .map(async (pathName): Promise<void> => {
+        const path = openApiDoc.paths[pathName];
 
-      if (path?.get) {
-        metadata.push(
-          await generateGetHook(
-            pathName,
-            containerApiUrl,
-            path.get.responses,
-            path.get.parameters as OpenAPIV3.ParameterObject[]
-          )
-        );
-      }
-      // TODO: post, put, delete, patch
-    })
+        if (path?.get) {
+          metadata.push(
+            await generateGetHook(
+              pathName,
+              containerApiUrl,
+              path.get.responses,
+              path.get.parameters as OpenAPIV3.ParameterObject[]
+            )
+          );
+        }
+        if (path?.post) {
+          metadata.push(
+            await generatePostHook(
+              pathName,
+              containerApiUrl,
+              path.post.responses,
+              path.post.requestBody as OpenAPIV3.RequestBodyObject,
+              path.post.parameters as OpenAPIV3.ParameterObject[]
+            )
+          );
+        }
+
+        // TODO: post, put, delete, patch
+      })
   );
 
   const formattedContent = await prettier.format(JSON.stringify(metadata), {

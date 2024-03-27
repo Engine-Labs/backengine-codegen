@@ -5,17 +5,20 @@ import { isReferenceObject } from "../../utils";
 export async function createResponseType(
   responses: OpenAPIV3.ResponsesObject,
   name: string
-): Promise<string> {
+): Promise<[string, boolean]> {
   const successResponse = parseResponse(responses);
 
   const schema = successResponse?.schema;
   if (!schema || isReferenceObject(schema)) {
-    return `export type ${name} = unknown;`;
+    return [`export type ${name} = void;`, false];
   }
 
-  return await compile(schema, name, {
-    bannerComment: "",
-  });
+  return [
+    await compile(schema, name, {
+      bannerComment: "",
+    }),
+    true,
+  ];
 }
 
 export function parseResponse(

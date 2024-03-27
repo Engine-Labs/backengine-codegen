@@ -1,10 +1,9 @@
 import { writeFile } from "fs-extra";
 import { OpenAPIV3 } from "openapi-types";
 import prettier from "prettier";
-import comment from "../comment";
-import { DIRECTORY, parseNameFormats } from "../utils";
-import type { HookMetadata } from "./types";
-import { createResponseType, parseResponse } from "./utils/response";
+import { HookMetadata } from "..";
+import comment from "../../comment";
+import { DIRECTORY, parseNameFormats } from "../../utils";
 import {
   appendQueryParametersToURL,
   callbackDependencies,
@@ -12,7 +11,8 @@ import {
   hookParameters,
   parseHookName,
   parseURL,
-} from "./utils";
+} from "../utils";
+import { createResponseType, parseResponse } from "../utils/response";
 
 export async function generateGetHook(
   pathName: string,
@@ -20,12 +20,13 @@ export async function generateGetHook(
   responses: OpenAPIV3.ResponsesObject,
   parameterObjects?: OpenAPIV3.ParameterObject[]
 ): Promise<HookMetadata> {
+  const { pascalCase } = parseNameFormats(pathName);
+
   const url = parseURL(pathName, containerApiUrl);
   const hookName = parseHookName(pathName, "get");
 
-  const { pascalCase } = parseNameFormats(pathName);
   const responseTypeName = `${pascalCase}Response`;
-  const responseType = await createResponseType(responses, responseTypeName);
+  const [responseType] = await createResponseType(responses, responseTypeName);
 
   const content = `
     ${comment}
