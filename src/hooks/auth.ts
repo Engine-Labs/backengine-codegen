@@ -3,7 +3,7 @@ import prettier from "prettier";
 import comment from "../comment";
 import { DIRECTORY } from "../utils";
 import { parseURL } from "./utils";
-import type { HookMetadata } from "./types";
+import { HookMetadata } from ".";
 
 export async function generateLoginHook(
   containerApiUrl: string

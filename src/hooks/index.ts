@@ -52,7 +52,7 @@ export const parseHookFiles = async (
           );
         }
 
-        // TODO: post, put, delete, patch
+        // TODO: put, delete, patch
       })
   );
 
