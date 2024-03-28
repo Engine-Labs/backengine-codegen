@@ -15,17 +15,9 @@ export const log = (message: string) => {
 };
 
 export const logError = (message: string, error: any) => {
-  if (error instanceof Error) {
-    const errorMessageWithGradient = errorGradient(
-      `[Backengine] ${error.message}`
-    );
-    console.error(error);
-    console.error(errorMessageWithGradient);
-  } else {
-    console.error(error);
-  }
   const messageWithGradient = errorGradient(`[Backengine] ${message}`);
   console.error(messageWithGradient);
+  console.error(error);
 };
 
 export const DIRECTORY = "__backengine__";

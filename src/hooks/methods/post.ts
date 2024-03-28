@@ -98,7 +98,7 @@ export async function generatePostHook(
     parser: "typescript",
   });
 
-  console.log(formattedContent);
+  // console.log(formattedContent);
 
   await writeFile(`${DIRECTORY}/hooks/${hookName}.ts`, formattedContent);
 

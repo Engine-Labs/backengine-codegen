@@ -1,7 +1,7 @@
 import { writeFile } from "fs-extra";
 import { OpenAPIV3 } from "openapi-types";
 import prettier from "prettier";
-import { DIRECTORY } from "../utils";
+import { DIRECTORY, logError } from "../utils";
 import { generateLoginHook } from "./auth";
 import { generateGetHook, generatePostHook } from "./methods";
 
@@ -31,25 +31,32 @@ export const parseHookFiles = async (
         const path = openApiDoc.paths[pathName];
 
         if (path?.get) {
-          metadata.push(
-            await generateGetHook(
+          try {
+            const getMetadata = await generateGetHook(
               pathName,
               containerApiUrl,
               path.get.responses,
               path.get.parameters as OpenAPIV3.ParameterObject[]
-            )
-          );
+            );
+            metadata.push(getMetadata);
+          } catch (e) {
+            logError(`Failed to generate for GET ${pathName}`, e);
+          }
         }
+
         if (path?.post) {
-          metadata.push(
-            await generatePostHook(
+          try {
+            const postMetadata = await generatePostHook(
               pathName,
               containerApiUrl,
               path.post.responses,
               path.post.requestBody as OpenAPIV3.RequestBodyObject,
               path.post.parameters as OpenAPIV3.ParameterObject[]
-            )
-          );
+            );
+            metadata.push(postMetadata);
+          } catch (e) {
+            logError(`Failed to generate for POST ${pathName}`, e);
+          }
         }
 
         // TODO: put, delete, patch
