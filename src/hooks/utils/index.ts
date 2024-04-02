@@ -2,11 +2,14 @@ import { OpenAPIV3 } from "openapi-types";
 import { isReferenceObject, parseNameFormats } from "../../utils";
 
 export function parseHookName(pathName: string, method: string) {
-  const { pascalCase } = parseNameFormats(pathName);
+  const { pascalCaseRaw } = parseNameFormats(pathName);
   if (method === "get") {
-    return `use${pascalCase.replace("Api", "")}Query`;
+    return `use${pascalCaseRaw.replace("Api", "")}Query`;
   }
-  return `use${pascalCase.replace("Api", "")}Mutation`;
+  if (method === "delete") {
+    return `use${pascalCaseRaw.replace("Api", "")}DeleteMutation`;
+  }
+  return `use${pascalCaseRaw.replace("Api", "")}PostMutation`;
 }
 
 export function parseURL(pathName: string, containerApiUrl: string) {

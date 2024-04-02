@@ -3,7 +3,11 @@ import { OpenAPIV3 } from "openapi-types";
 import prettier from "prettier";
 import { DIRECTORY, logError } from "../utils";
 import { generateLoginHook } from "./auth";
-import { generateGetHook, generatePostHook } from "./methods";
+import {
+  generateDeleteHook,
+  generateGetHook,
+  generatePostHook,
+} from "./methods";
 
 export type HookMetadata = {
   hookName: string;
@@ -59,7 +63,21 @@ export const parseHookFiles = async (
           }
         }
 
-        // TODO: put, delete, patch
+        if (path?.delete) {
+          try {
+            const deleteMetadata = await generateDeleteHook(
+              pathName,
+              containerApiUrl,
+              path.delete.responses,
+              path.delete.parameters as OpenAPIV3.ParameterObject[]
+            );
+            metadata.push(deleteMetadata);
+          } catch (e) {
+            logError(`Failed to generate for DELETE ${pathName}`, e);
+          }
+        }
+
+        // TODO: put, patch
       })
   );
 

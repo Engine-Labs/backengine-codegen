@@ -30,6 +30,7 @@ export const parseNameFormats = (
   name: string
 ): {
   name: string;
+  pascalCaseRaw: string;
   pascalCase: string;
   pascalCasePlural: string;
   camelCase: string;
@@ -37,6 +38,7 @@ export const parseNameFormats = (
 } => {
   return {
     name,
+    pascalCaseRaw: sanitiseFormat(toPascalCase(name)),
     pascalCase: sanitiseFormat(singular(toPascalCase(name))),
     pascalCasePlural: sanitiseFormat(plural(toPascalCase(name))),
     camelCase: sanitiseFormat(singular(toCamelCase(name))),
