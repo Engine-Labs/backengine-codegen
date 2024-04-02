@@ -6,7 +6,9 @@ import { generateLoginHook } from "./auth";
 import {
   generateDeleteHook,
   generateGetHook,
+  generatePatchHook,
   generatePostHook,
+  generatePutHook,
 } from "./methods";
 
 export type HookMetadata = {
@@ -77,7 +79,35 @@ export const parseHookFiles = async (
           }
         }
 
-        // TODO: put, patch
+        if (path?.put) {
+          try {
+            const putMetadata = await generatePutHook(
+              pathName,
+              containerApiUrl,
+              path.put.responses,
+              path.put.requestBody as OpenAPIV3.RequestBodyObject,
+              path.put.parameters as OpenAPIV3.ParameterObject[]
+            );
+            metadata.push(putMetadata);
+          } catch (e) {
+            logError(`Failed to generate for PUT ${pathName}`, e);
+          }
+        }
+
+        if (path?.patch) {
+          try {
+            const patchMetadata = await generatePatchHook(
+              pathName,
+              containerApiUrl,
+              path.patch.responses,
+              path.patch.requestBody as OpenAPIV3.RequestBodyObject,
+              path.patch.parameters as OpenAPIV3.ParameterObject[]
+            );
+            metadata.push(patchMetadata);
+          } catch (e) {
+            logError(`Failed to generate for PATCH ${pathName}`, e);
+          }
+        }
       })
   );
 

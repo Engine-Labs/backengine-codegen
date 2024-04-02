@@ -14,7 +14,7 @@ import {
 } from "../utils";
 import { HookMetadata } from "..";
 
-export async function generatePostHook(
+export async function generatePutHook(
   pathName: string,
   containerApiUrl: string,
   responses: OpenAPIV3.ResponsesObject,
@@ -24,7 +24,7 @@ export async function generatePostHook(
   const { pascalCase } = parseNameFormats(pathName);
 
   const url = parseURL(pathName, containerApiUrl);
-  const hookName = parseHookName(pathName, "post");
+  const hookName = parseHookName(pathName, "put");
 
   const responseTypeName = `${pascalCase}Response`;
   const [responseType, returnsResponse] = await createResponseType(
@@ -70,7 +70,7 @@ export async function generatePostHook(
             url.toString(),
             {
               headers: headers(),
-              method: "POST",
+              method: "PUT",
               body: JSON.stringify(body)
             }
           );

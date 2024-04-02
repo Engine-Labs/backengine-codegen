@@ -3,13 +3,19 @@ import { isReferenceObject, parseNameFormats } from "../../utils";
 
 export function parseHookName(pathName: string, method: string) {
   const { pascalCaseRaw } = parseNameFormats(pathName);
-  if (method === "get") {
-    return `use${pascalCaseRaw.replace("Api", "")}Query`;
+  const hookName = pascalCaseRaw.replace("Api", "");
+  switch (method) {
+    case "get":
+      return `use${hookName}Query`;
+    case "delete":
+      return `use${hookName}DeleteMutation`;
+    case "put":
+      return `use${hookName}PutMutation`;
+    case "patch":
+      return `use${hookName}PatchMutation`;
+    default:
+      return `use${hookName}PostMutation`;
   }
-  if (method === "delete") {
-    return `use${pascalCaseRaw.replace("Api", "")}DeleteMutation`;
-  }
-  return `use${pascalCaseRaw.replace("Api", "")}PostMutation`;
 }
 
 export function parseURL(pathName: string, containerApiUrl: string) {

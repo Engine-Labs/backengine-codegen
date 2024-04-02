@@ -93,7 +93,7 @@ export async function generateDeleteHook(
     parser: "typescript",
   });
 
-  console.log(formattedContent);
+  // console.log(formattedContent);
 
   await writeFile(`${DIRECTORY}/hooks/${hookName}.ts`, formattedContent);
 
